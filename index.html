@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>for Nargiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f1e6c9;
+    --paper-shadow:#e0cf9f;
+    --paper-dark:#d8c493;
+    --ink:#3a2c1e;
+    --ink-soft:#5b4632;
+    --wax:#7a2420;
+    --wax-dark:#5c1a17;
+    --wax-bright:#a8402f;
+    --gold:#b6905a;
+    --gold-light:#d9b97e;
+    --rose:#c76b73;
+    --rose-light:#e6a5ab;
+    --green:#3f5236;
+    --night:#0c1220;
+    --night-2:#161f35;
+    --star:#f4ecd8;
+    --blush:#f6e2df;
+    --blush-2:#eccfd2;
+    --plum:#241a2e;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    padding:0;
+    height:100%;
+    background:var(--night);
+    font-family:'EB Garamond', serif;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .stage{
+    position:relative;
+    width:100%;
+    height:100dvh;
+    min-height:100vh;
+    overflow:hidden;
+  }
+
+  /* ---------- Screen transition system ---------- */
+  .screen{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:6vh 5vw;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    opacity:0;
+    transform:translateX(64px) scale(.97);
+    transition:opacity 1.5s cubic-bezier(.22,.61,.36,1), transform 1.5s cubic-bezier(.22,.61,.36,1);
+    pointer-events:none;
+    z-index:1;
+  }
+  .screen.active{
+    opacity:1;
+    transform:translateX(0) scale(1);
+    pointer-events:auto;
+    z-index:2;
+  }
+  .screen.enter-left{ transform:translateX(-64px) scale(.97); opacity:0; }
+  .screen.enter-right{ transform:translateX(64px) scale(.97); opacity:0; }
+  .screen.exit-left{ transform:translateX(-64px) scale(.97); opacity:0; z-index:1; }
+  .screen.exit-right{ transform:translateX(64px) scale(.97); opacity:0; z-index:1; }
+
+  @media (prefers-reduced-motion: reduce){
+    .screen{ transition:opacity .3s linear; transform:none !important; }
+  }
+
+  button{ font-family:inherit; cursor:pointer; }
+
+  .back-btn{
+    position:absolute;
+    top:max(18px, env(safe-area-inset-top));
+    left:18px;
+    z-index:5;
+    background:transparent;
+    border:1px solid rgba(255,255,255,.0);
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:1.05rem;
+    letter-spacing:.02em;
+    padding:8px 14px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:background .25s ease, transform .2s ease, opacity .2s ease;
+  }
+  .back-btn:active{ transform:scale(.94); }
+  .back-btn.on-paper{ color:var(--wax-dark); }
+  .back-btn.on-paper:hover{ background:rgba(90,40,25,.08); }
+  .back-btn.on-night{ color:var(--gold-light); }
+  .back-btn.on-night:hover{ background:rgba(217,185,126,.1); }
+
+  .center-col{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    max-width:560px;
+    margin:auto;
+  }
+  .eyebrow{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    letter-spacing:.14em;
+    text-transform:lowercase;
+    color:var(--ink-soft);
+    font-size:clamp(.8rem,2.4vw,.95rem);
+    margin-bottom:2px;
+  }
+  .name-title{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-weight:600;
+    color:var(--wax-dark);
+    font-size:clamp(2.6rem,10vw,4.2rem);
+    line-height:1;
+    margin:0 0 10px;
+    text-shadow:0 1px 0 rgba(255,255,255,.35);
+  }
+  .section-heading{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-weight:600;
+    color:var(--wax-dark);
+    font-size:clamp(1.7rem,6.5vw,2.4rem);
+    line-height:1.15;
+    margin:0 0 8px;
+  }
+  .intro-line{
+    color:var(--ink-soft);
+    font-size:clamp(.95rem,2.6vw,1.15rem);
+    max-width:34ch;
+    margin:0 0 clamp(20px,4vh,32px);
+  }
+  .paper-grain{
+    position:absolute; inset:0; pointer-events:none;
+    opacity:.5;
+    mix-blend-mode:multiply;
+  }
+  .bg-art{ position:absolute; pointer-events:none; }
+  .bg-roses-tl{ left:-4%; top:-5%; width:min(300px,52vw); opacity:.5; transform:rotate(-6deg); }
+  .bg-roses-br{ right:-6%; bottom:-6%; width:min(320px,56vw); opacity:.45; transform:rotate(8deg) scaleX(-1); }
+
+  /* ================= SCREEN 1 — PASSWORD ================= */
+  #screen1{
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(199,107,115,.10), transparent 45%),
+      radial-gradient(ellipse at 85% 90%, rgba(63,82,54,.10), transparent 50%),
+      linear-gradient(160deg, var(--paper) 0%, var(--paper-shadow) 55%, var(--paper-dark) 100%);
+  }
+  .pw-lock-icon{ width:54px; height:54px; margin-bottom:6px; }
+  .pw-digits{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    margin:20px 0 8px;
+  }
+  .pw-digit{
+    width:52px; height:64px;
+    text-align:center;
+    font-family:'Cormorant Garamond', serif;
+    font-size:1.8rem;
+    font-weight:600;
+    color:var(--wax-dark);
+    background:rgba(255,255,255,.35);
+    border:none;
+    border-bottom:2.5px solid var(--wax-dark);
+    border-radius:6px 6px 0 0;
+    outline:none;
+    transition:transform .15s ease, border-color .2s ease, background .2s ease;
+  }
+  .pw-digit:focus{ border-color:var(--wax-bright); background:rgba(255,255,255,.55); transform:translateY(-2px); }
+  .pw-digits.shake{ animation:pwShake .45s ease; }
+  @keyframes pwShake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-10px); }
+    40%{ transform:translateX(9px); }
+    60%{ transform:translateX(-6px); }
+    80%{ transform:translateX(4px); }
+  }
+  .pw-hint{
+    min-height:1.4em;
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color:var(--wax-dark);
+    opacity:0;
+    transform:translateY(-4px);
+    transition:opacity .4s ease, transform .4s ease;
+    margin:4px 0 16px;
+  }
+  .pw-hint.show{ opacity:.85; transform:translateY(0); }
+  .pw-unlock{
+    margin-top:4px;
+    background:var(--wax-dark);
+    color:var(--paper);
+    border:none;
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:1.05rem;
+    padding:11px 32px;
+    border-radius:26px;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .pw-unlock:hover{ background:var(--wax-bright); }
+  .pw-unlock:active{ transform:scale(.96); }
+
+  /* ================= SCREEN 2 — DIGITAL FLOWERS ================= */
+  #screen2{
+    background:
+      radial-gradient(ellipse at 15% 0%, rgba(255,255,255,.5), transparent 45%),
+      radial-gradient(ellipse at 90% 100%, rgba(63,82,54,.12), transparent 50%),
+      linear-gradient(160deg, var(--blush) 0%, var(--blush-2) 55%, #e4c3c8 100%);
+  }
+  .bouquet-wrap{
+    width:min(440px,92vw);
+    margin:4px auto 6px;
+  }
+  .bouquet-wrap svg{
+    width:100%;
+    height:auto;
+    display:block;
+    overflow:visible;
+  }
+  .flower-btn{ cursor:pointer; }
+  .flower-inner{
+    transform-box:fill-box;
+    transform-origin:50% 100%;
+    transition:transform .35s cubic-bezier(.4,1.8,.4,1);
+  }
+  .flower-btn:hover .flower-inner,
+  .flower-btn.selected .flower-inner{ transform:scale(1.16); }
+  .flower-use{
+    filter:drop-shadow(0 3px 5px rgba(90,40,40,.18));
+    transition:filter .3s ease;
+  }
+  .flower-btn.selected .flower-use{
+    filter:drop-shadow(0 0 8px rgba(199,107,115,.85)) drop-shadow(0 3px 5px rgba(90,40,40,.18));
+  }
+  .bouquet-msg-card{
+    min-height:70px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px 24px;
+    margin:6px auto 24px;
+    max-width:440px;
+    background:rgba(255,255,255,.45);
+    border:1px solid rgba(199,107,115,.3);
+    border-radius:16px;
+  }
+  .bouquet-msg-text{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:1.15rem;
+    color:var(--ink-soft);
+    line-height:1.45;
+    margin:0;
+    transition:opacity .25s ease;
+  }
+
+  /* ================= SCREEN 3 — ENVELOPE ================= */
+  #screen3{
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(199,107,115,.10), transparent 45%),
+      radial-gradient(ellipse at 85% 90%, rgba(63,82,54,.10), transparent 50%),
+      linear-gradient(160deg, var(--paper) 0%, var(--paper-shadow) 55%, var(--paper-dark) 100%);
+  }
+
+  /* --- envelope photo --- */
+  .envelope-photo-wrap{
+    position:relative;
+    width:min(300px, 74vw);
+    aspect-ratio:736/981;
+    margin:0 auto;
+    transform:rotate(-3deg);
+    filter:drop-shadow(0 22px 34px rgba(40,26,14,.35));
+    transition:transform .9s cubic-bezier(.6,-0.15,.3,1.4), opacity .9s ease, filter .9s ease;
+  }
+  .envelope-photo{
+    width:100%; height:100%;
+    object-fit:cover;
+    border-radius:3px;
+    display:block;
+    box-shadow:0 0 0 6px #fffdf7, 0 0 0 7px rgba(0,0,0,.06);
+  }
+  .seal-hotspot{
+    position:absolute;
+    left:63%; top:44%;
+    width:15%; aspect-ratio:1;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background:transparent;
+    border:none;
+    padding:0;
+  }
+  .seal-ring{
+    position:absolute; inset:-38%;
+    border-radius:50%;
+    border:1.5px solid rgba(168,64,47,.55);
+    opacity:0;
+    animation:sealPulse 2.6s ease-out infinite;
+  }
+  .seal-ring.d2{ animation-delay:.9s; }
+  @keyframes sealPulse{
+    0%{ transform:scale(.75); opacity:0; }
+    18%{ opacity:.65; }
+    70%{ opacity:0; }
+    100%{ transform:scale(1.5); opacity:0; }
+  }
+  .seal-flash{
+    position:absolute; inset:-10%;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,244,214,.95) 0%, rgba(255,214,150,.55) 40%, transparent 72%);
+    opacity:0;
+    pointer-events:none;
+  }
+  .envelope-photo-wrap.cracking .seal-flash{
+    animation:sealFlash .6s ease-out forwards;
+  }
+  @keyframes sealFlash{
+    0%{ opacity:0; transform:scale(.4); }
+    35%{ opacity:1; transform:scale(1.15); }
+    100%{ opacity:0; transform:scale(2.1); }
+  }
+  .envelope-photo-wrap.opening{
+    animation:envelopeOpen 1.05s cubic-bezier(.5,0,.25,1) .25s forwards;
+  }
+  @keyframes envelopeOpen{
+    0%{ transform:rotate(-3deg) scale(1); filter:drop-shadow(0 22px 34px rgba(40,26,14,.35)) brightness(1); }
+    55%{ transform:rotate(1deg) scale(1.07); filter:drop-shadow(0 30px 40px rgba(40,26,14,.3)) brightness(1.18); }
+    100%{ transform:rotate(2.5deg) scale(1.22); filter:drop-shadow(0 30px 40px rgba(40,26,14,.1)) brightness(1.5); opacity:0; }
+  }
+  .letter-peek{
+    position:absolute;
+    left:50%; bottom:8%;
+    width:74%; height:30%;
+    transform:translate(-50%,0) scaleY(.15);
+    transform-origin:bottom center;
+    background:linear-gradient(180deg,#fbf4e2,#f0e3c2);
+    border-radius:2px 2px 0 0;
+    box-shadow:0 -2px 10px rgba(90,60,20,.18);
+    opacity:0;
+    z-index:-1;
+  }
+  .envelope-photo-wrap.opening .letter-peek{
+    animation:peekUp 1s cubic-bezier(.22,.7,.3,1) .35s forwards;
+  }
+  @keyframes peekUp{
+    0%{ opacity:0; transform:translate(-50%,0) scaleY(.15); }
+    40%{ opacity:1; }
+    100%{ opacity:1; transform:translate(-50%,-60%) scaleY(1); }
+  }
+
+  .tiger-mascot{
+    width:112px;
+    height:auto;
+    display:block;
+    margin:20px auto 2px;
+    animation:tigerBreathe 6s ease-in-out infinite;
+  }
+  @keyframes tigerBreathe{
+    0%,100%{ transform:scale(1) rotate(0deg); }
+    50%{ transform:scale(1.045) rotate(-2deg); }
+  }
+
+  .footnote{
+    margin-top:clamp(10px,2vh,18px);
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:clamp(.78rem,2.2vw,.9rem);
+    color:var(--ink-soft);
+    opacity:.85;
+    max-width:38ch;
+  }
+  .footnote .paw{ opacity:.7; }
+
+  /* ================= SCREEN 4 — LETTER ================= */
+  #screen4{
+    background:radial-gradient(ellipse at 50% -10%, var(--night-2), var(--night) 65%);
+  }
+  .letter-card{
+    position:relative;
+    width:min(640px, 92vw);
+    max-height:86vh;
+    overflow-y:auto;
+    padding:clamp(30px,7vw,62px) clamp(26px,7vw,58px) clamp(38px,6vw,54px);
+    background:
+      linear-gradient(120deg, rgba(255,255,255,.5), rgba(255,255,255,0) 30%),
+      radial-gradient(ellipse at 78% 8%, rgba(255,241,204,.55), transparent 45%),
+      linear-gradient(160deg, #f7f0dd 0%, #efe3c4 45%, #e3d2a4 100%);
+    background-blend-mode:normal, screen, normal;
+    box-shadow:0 30px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(90,60,20,.08) inset;
+    clip-path:polygon(0.0% 0.52%, 7.14% 0.24%, 14.29% 1.04%, 21.43% 0.12%, 28.57% 0.86%, 35.71% 0.59%, 42.86% 0.09%, 50.0% 0.81%, 57.14% 0.06%, 64.29% 0.69%, 71.43% 0.11%, 78.57% 0.15%, 85.71% 0.68%, 92.86% 1.32%, 100.0% 0.2%, 99.0% 7.14%, 98.48% 14.29%, 99.08% 21.43%, 99.37% 28.57%, 98.44% 35.71%, 99.93% 42.86%, 98.63% 50.0%, 99.54% 57.14%, 99.77% 64.29%, 99.81% 71.43%, 99.51% 78.57%, 98.69% 85.71%, 99.71% 92.86%, 99.07% 100.0%, 92.86% 99.4%, 85.71% 99.12%, 78.57% 99.9%, 71.43% 99.9%, 64.29% 99.67%, 57.14% 98.91%, 50.0% 99.32%, 42.86% 99.5%, 35.71% 99.06%, 28.57% 99.27%, 21.43% 99.52%, 14.29% 98.73%, 7.14% 98.88%, 0.0% 99.61%, 0.84% 92.86%, 1.4% 85.71%, 1.17% 78.57%, 0.46% 71.43%, 1.57% 64.29%, 0.19% 57.14%, 0.67% 50.0%, 1.21% 42.86%, 0.24% 35.71%, 0.78% 28.57%, 0.06% 21.43%, 1.07% 14.29%, 1.22% 7.14%, 0.92% 0.0%);
+    transform:scale(.94);
+    opacity:0;
+    animation:none;
+  }
+  #screen4.active .letter-card{
+    animation:unfold 1s cubic-bezier(.2,.7,.25,1) .15s forwards;
+  }
+  @keyframes unfold{
+    0%{ opacity:0; transform:scale(.9) translateY(14px); }
+    100%{ opacity:1; transform:scale(1) translateY(0); }
+  }
+  .letter-card::before{
+    content:"";
+    position:absolute; inset:0;
+    background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0.25  0 0 0 0 0.18  0 0 0 0 0.1  0 0 0 0.05 0"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>');
+    opacity:.5;
+    pointer-events:none;
+    mix-blend-mode:multiply;
+  }
+  .letter-card::after{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 6% 8%, rgba(120,80,30,.28), transparent 20%),
+      radial-gradient(circle at 96% 12%, rgba(120,80,30,.18), transparent 16%),
+      radial-gradient(circle at 90% 94%, rgba(120,80,30,.3), transparent 22%),
+      radial-gradient(circle at 8% 92%, rgba(120,80,30,.22), transparent 18%),
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,0), transparent 60%);
+    mix-blend-mode:multiply;
+    pointer-events:none;
+  }
+  .fold-line{
+    position:absolute; left:4%; right:4%; height:10px;
+    background:linear-gradient(180deg, rgba(90,60,20,.16), rgba(255,255,255,.35) 55%, rgba(90,60,20,.1));
+    mix-blend-mode:multiply;
+    pointer-events:none;
+    opacity:.65;
+  }
+  .fold-line.f1{ top:33%; }
+  .fold-line.f2{ top:66%; }
+
+  .letter-body{ position:relative; z-index:2; }
+  .salutation{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-weight:600;
+    color:var(--wax-dark);
+    font-size:clamp(1.5rem,4.6vw,2rem);
+    margin:0 0 1.1em;
+  }
+  .letter-body p{
+    color:var(--ink);
+    font-size:clamp(1rem,2.6vw,1.12rem);
+    line-height:1.85;
+    margin:0 0 1.15em;
+    letter-spacing:.005em;
+  }
+  .signature{
+    font-family:'Dancing Script', cursive;
+    font-weight:700;
+    font-size:clamp(2.1rem,7vw,2.7rem);
+    color:var(--wax-dark);
+    margin-top:.3em;
+    line-height:1;
+  }
+  .sign-row{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:.2em;
+  }
+  .mini-seal{
+    flex:0 0 auto;
+    width:clamp(46px,10vw,64px);
+    height:clamp(46px,10vw,64px);
+    opacity:.92;
+    transform:rotate(8deg);
+    filter:drop-shadow(0 4px 6px rgba(0,0,0,.35));
+  }
+  .turn-page{
+    margin-top:22px;
+    background:none;
+    border:1px solid var(--wax-dark);
+    color:var(--wax-dark);
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:clamp(1rem,2.8vw,1.15rem);
+    padding:10px 26px;
+    border-radius:26px;
+    transition:background .25s ease, color .25s ease, transform .2s ease;
+  }
+  .turn-page:hover{ background:var(--wax-dark); color:var(--paper); }
+  .turn-page:active{ transform:scale(.96); }
+  .turn-page.on-dark{ border-color:var(--gold-light); color:var(--gold-light); }
+  .turn-page.on-dark:hover{ background:var(--gold-light); color:var(--night); }
+  .turn-page-wrap{ position:relative; z-index:2; text-align:center; }
+
+  /* ================= SCREEN 5 — STARS ================= */
+  #screen5{
+    background:radial-gradient(ellipse at 50% -10%, var(--night-2), var(--night) 65%);
+    padding-bottom:8vh;
+  }
+  .starfield-canvas{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    z-index:0;
+  }
+  .branch{ position:absolute; opacity:.5; pointer-events:none; z-index:1; }
+  .branch-l{ left:-2%; bottom:-2%; width:min(260px,46vw); }
+  .branch-r{ right:-2%; bottom:-2%; width:min(260px,46vw); transform:scaleX(-1); }
+
+  .s3-content{
+    position:relative; z-index:2;
+    width:100%;
+    max-width:760px;
+    margin:0 auto;
+    text-align:center;
+    padding-top:2vh;
+  }
+  .s3-title{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-weight:600;
+    color:var(--star);
+    font-size:clamp(1.7rem,6vw,2.5rem);
+    margin:0 0 8px;
+  }
+  .s3-intro{
+    color:#c9cfe0;
+    font-size:clamp(.92rem,2.6vw,1.05rem);
+    max-width:44ch;
+    margin:0 auto clamp(24px,5vh,36px);
+  }
+
+  .music-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    justify-content:center;
+    margin-bottom:clamp(20px,4vh,30px);
+  }
+  .player-card{
+    width:min(360px,100%);
+    background:linear-gradient(160deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+    border:1px solid rgba(217,185,126,.2);
+    border-radius:18px;
+    padding:16px;
+    text-align:left;
+    box-shadow:0 12px 30px rgba(0,0,0,.3);
+  }
+  .player-top{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:16px;
+  }
+  .player-art{
+    width:60px; height:60px;
+    flex:0 0 auto;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 6px 16px rgba(0,0,0,.4);
+  }
+  .player-art svg,
+  .player-art img{ width:100%; height:100%; display:block; object-fit:cover; }
+  .player-meta{ flex:1 1 auto; min-width:0; }
+  .player-title{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-weight:600;
+    color:var(--star);
+    font-size:1.08rem;
+    margin:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .player-artist{
+    color:#a9b0c9;
+    font-size:.85rem;
+    margin:3px 0 0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .player-play{
+    flex:0 0 auto;
+    width:42px; height:42px;
+    border-radius:50%;
+    background:var(--gold-light);
+    border:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:transform .15s ease, background .2s ease;
+  }
+  .player-play:hover{ background:#f4ecd8; }
+  .player-play:active{ transform:scale(.9); }
+  .player-play svg{ width:16px; height:16px; }
+  .player-play .icon-pause{ display:none; }
+  .player-play.playing .icon-play{ display:none; }
+  .player-play.playing .icon-pause{ display:block; }
+  .player-progress-row{
+    display:flex;
+    align-items:center;
+    gap:9px;
+  }
+  .player-time{
+    font-family:'Courier New', monospace;
+    font-size:.7rem;
+    color:#a9b0c9;
+    min-width:30px;
+    text-align:center;
+    flex:0 0 auto;
+  }
+  .player-seek{
+    flex:1 1 auto;
+    -webkit-appearance:none;
+    appearance:none;
+    height:4px;
+    border-radius:2px;
+    background:rgba(255,255,255,.18);
+    outline:none;
+    cursor:pointer;
+  }
+  .player-seek::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    appearance:none;
+    width:12px; height:12px;
+    border-radius:50%;
+    background:var(--star);
+    box-shadow:0 0 4px rgba(0,0,0,.5);
+  }
+  .player-seek::-moz-range-thumb{
+    width:12px; height:12px;
+    border-radius:50%;
+    background:var(--star);
+    border:none;
+  }
+  .player-card-spotify{ padding:14px; }
+  .player-card-spotify .track-label{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color:var(--gold-light);
+    font-size:.92rem;
+    margin:0 0 8px 4px;
+  }
+  .player-card-spotify .spotify-embed{
+    width:100%;
+    height:152px;
+    border-radius:12px;
+    border:none;
+    display:block;
+  }
+  .music-note{
+    color:#a9b0c9;
+    font-size:.85rem;
+    font-style:italic;
+    max-width:46ch;
+    margin:0 auto clamp(24px,4vh,32px);
+  }
+
+  .section-title{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color:var(--gold-light);
+    font-size:clamp(1.2rem,4vw,1.6rem);
+    margin:0 0 clamp(16px,4vh,26px);
+  }
+  .photo-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:clamp(10px,2.6vw,20px);
+    margin-bottom:26px;
+  }
+  @media (max-width:640px){
+    .photo-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+  .photo-frame{
+    position:relative;
+    aspect-ratio:3/4;
+    background:#fdf9ee;
+    padding:8px 8px 20px;
+    border-radius:2px;
+    box-shadow:0 10px 24px rgba(0,0,0,.45);
+    opacity:0;
+    transform:translateY(18px) rotate(var(--r,0deg));
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  #screen5.active .photo-frame{
+    opacity:1;
+    transform:translateY(0) rotate(var(--r,0deg));
+  }
+  #screen5.active .photo-frame:nth-child(1){ transition-delay:.05s; }
+  #screen5.active .photo-frame:nth-child(2){ transition-delay:.15s; }
+  #screen5.active .photo-frame:nth-child(3){ transition-delay:.25s; }
+  #screen5.active .photo-frame:nth-child(4){ transition-delay:.35s; }
+  #screen5.active .photo-frame:nth-child(5){ transition-delay:.45s; }
+  #screen5.active .photo-frame:nth-child(6){ transition-delay:.55s; }
+  .photo-frame:nth-child(1){ --r:-3deg; }
+  .photo-frame:nth-child(2){ --r:2deg; }
+  .photo-frame:nth-child(3){ --r:-2deg; }
+  .photo-frame:nth-child(4){ --r:3deg; }
+  .photo-frame:nth-child(5){ --r:-1.5deg; }
+  .photo-frame:nth-child(6){ --r:2.5deg; }
+  .photo-frame img{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+    filter:sepia(.08) saturate(1.05);
+  }
+  .photo-frame:hover{ transform:translateY(-4px) rotate(0deg) scale(1.03); z-index:3; }
+  .photo-fallback{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft);
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:.9rem;
+  }
+  .s5-more{ position:relative; z-index:2; text-align:center; }
+
+  /* ================= SCREEN 6 — DINO GAME ================= */
+  #screen6{
+    background:
+      radial-gradient(ellipse at 25% 0%, rgba(199,107,115,.10), transparent 45%),
+      linear-gradient(160deg, var(--paper) 0%, var(--paper-shadow) 55%, var(--paper-dark) 100%);
+  }
+  .dino-content{ position:relative; z-index:2; text-align:center; max-width:640px; margin:auto; }
+  .dino-wrap{
+    position:relative;
+    width:min(600px,92vw);
+    margin:16px auto 0;
+    border:2px solid var(--ink-soft);
+    border-radius:10px;
+    overflow:hidden;
+    background:#f6ecd2;
+    box-shadow:0 16px 32px rgba(60,40,20,.25);
+  }
+  #dinoCanvas{ display:block; width:100%; height:220px; touch-action:none; }
+  .dino-score{
+    position:absolute; top:10px; right:14px;
+    display:flex; gap:10px;
+    font-family:'Courier New', monospace;
+    font-weight:700;
+    color:var(--ink-soft);
+    font-size:1.05rem;
+    letter-spacing:.03em;
+  }
+  .dino-score .dino-current{ color:var(--ink); }
+  .dino-overlay{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    padding:20px;
+    background:rgba(241,230,201,.78);
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color:var(--wax-dark);
+    font-size:1.15rem;
+    cursor:pointer;
+    transition:opacity .3s ease;
+  }
+  .dino-overlay.hidden{ opacity:0; pointer-events:none; }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(120,90,50,.35); border-radius:6px; }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- ================= SCREEN 1 : PASSWORD ================= -->
+  <section id="screen1" class="screen active">
+    <div class="paper-grain" style="background:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22/><feColorMatrix type=%22matrix%22 values=%220 0 0 0 0.3  0 0 0 0 0.22  0 0 0 0 0.12  0 0 0 0.04 0%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>');"></div>
+    <img class="bg-art bg-roses-tl" src="roses.svg" alt="" aria-hidden="true">
+    <img class="bg-art bg-roses-br" src="roses.svg" alt="" aria-hidden="true">
+
+    <div class="center-col">
+      <svg class="pw-lock-icon" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50,88 C20,66 6,46 6,28 C6,12 20,4 32,10 C40,14 46,22 50,30 C54,22 60,14 68,10 C80,4 94,12 94,28 C94,46 80,66 50,88 Z" fill="none" stroke="#5c1a17" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="50" cy="44" r="7" fill="#5c1a17"/>
+        <rect x="47" y="44" width="6" height="14" rx="2" fill="#5c1a17"/>
+      </svg>
+      <div class="eyebrow">for Nargiz's eyes only</div>
+      <h1 class="section-heading">a little secret first</h1>
+      <p class="intro-line">enter the code to open your gift</p>
+
+      <div class="pw-digits" id="pwDigits">
+        <input class="pw-digit" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="digit 1">
+        <input class="pw-digit" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="digit 2">
+        <input class="pw-digit" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="digit 3">
+        <input class="pw-digit" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="digit 4">
+      </div>
+      <p class="pw-hint" id="pwHint">hint: it's your birthday 🎂</p>
+      <button class="pw-unlock" id="pwUnlock">unlock</button>
+    </div>
+  </section>
+
+  <!-- ================= SCREEN 2 : DIGITAL FLOWERS ================= -->
+  <section id="screen2" class="screen enter-right">
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <symbol id="flowerRose" viewBox="0 0 100 140">
+          <path d="M50,138 L50,70" stroke="#3f5236" stroke-width="4" stroke-linecap="round"/>
+          <ellipse cx="38" cy="100" rx="14" ry="6" fill="#3f5236" transform="rotate(-25 38 100)"/>
+          <ellipse cx="64" cy="112" rx="13" ry="6" fill="#4a6142" transform="rotate(20 64 112)"/>
+          <circle cx="50" cy="46" r="30" fill="#c76b73"/>
+          <circle cx="50" cy="46" r="21" fill="#e6a5ab"/>
+          <circle cx="50" cy="46" r="11" fill="#c76b73"/>
+        </symbol>
+        <symbol id="flowerPeony" viewBox="0 0 100 140">
+          <path d="M50,138 L50,74" stroke="#3f5236" stroke-width="4" stroke-linecap="round"/>
+          <ellipse cx="36" cy="104" rx="13" ry="6" fill="#3f5236" transform="rotate(-25 36 104)"/>
+          <ellipse cx="64" cy="114" rx="12" ry="6" fill="#4a6142" transform="rotate(22 64 114)"/>
+          <circle cx="50" cy="50" r="28" fill="#f3c9d6"/>
+          <g fill="#eab0c4">
+            <circle cx="34" cy="42" r="14"/>
+            <circle cx="66" cy="42" r="14"/>
+            <circle cx="50" cy="28" r="14"/>
+            <circle cx="36" cy="62" r="13"/>
+            <circle cx="64" cy="62" r="13"/>
+            <circle cx="50" cy="68" r="13"/>
+          </g>
+          <circle cx="50" cy="48" r="10" fill="#d98aa6"/>
+          <circle cx="50" cy="48" r="5" fill="#c76b8d"/>
+        </symbol>
+      </defs>
+    </svg>
+
+    <div class="center-col" style="max-width:680px;">
+      <div class="eyebrow">a little something before the letter</div>
+      <h2 class="section-heading">my first gift for you</h2>
+      <p class="intro-line">each flower holds a little message just for you</p>
+
+      <div class="bouquet-wrap">
+        <svg id="bouquetSvg" viewBox="0 0 400 380">
+          <g id="bouquetFlowers"></g>
+          <g class="bouquet-bow" transform="translate(200,360)">
+            <ellipse cx="-14" cy="0" rx="16" ry="9" fill="#b6905a" transform="rotate(-25 -14 0)"/>
+            <ellipse cx="14" cy="0" rx="16" ry="9" fill="#b6905a" transform="rotate(25 14 0)"/>
+            <circle cx="0" cy="0" r="6" fill="#8a6a3c"/>
+            <path d="M-5,4 L-14,34 L-2,26 Z" fill="#b6905a"/>
+            <path d="M5,4 L14,34 L2,26 Z" fill="#b6905a"/>
+          </g>
+        </svg>
+      </div>
+      <div class="bouquet-msg-card">
+        <p class="bouquet-msg-text" id="bouquetMsgText">tap a flower to read its message 🌸</p>
+      </div>
+
+      <button class="turn-page" onclick="goTo(3)">continue &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ================= SCREEN 3 : ENVELOPE ================= -->
+  <section id="screen3" class="screen enter-right">
+    <button class="back-btn on-paper" onclick="goTo(2)">&larr; back</button>
+    <div class="paper-grain" style="background:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22><filter id=%22n2%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22/><feColorMatrix type=%22matrix%22 values=%220 0 0 0 0.3  0 0 0 0 0.22  0 0 0 0 0.12  0 0 0 0.04 0%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n2)%22/></svg>');"></div>
+
+    <img class="bg-art bg-roses-tl" src="roses.svg" alt="" aria-hidden="true">
+    <img class="bg-art bg-roses-br" src="roses.svg" alt="" aria-hidden="true">
+
+    <div class="center-col">
+      <div class="eyebrow">a small letter for</div>
+      <h1 class="name-title">Nargiz</h1>
+      <p class="intro-line">Before you open it — just so you know, this took a little courage to write.</p>
+
+      <div class="envelope-photo-wrap" id="envelopeWrap">
+        <img class="envelope-photo" src="envelope.jpg" alt="a sealed cream envelope with a red wax seal">
+        <div class="letter-peek"></div>
+        <button class="seal-hotspot" id="sealBtn" aria-label="Break the seal and open the letter">
+          <span class="seal-ring"></span>
+          <span class="seal-ring d2"></span>
+          <span class="seal-flash"></span>
+        </button>
+      </div>
+
+      <svg class="tiger-mascot" viewBox="0 0 240 260" aria-hidden="true">
+        <defs>
+          <radialGradient id="furGrad" cx="38%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="#f2a15a"/>
+            <stop offset="60%" stop-color="#e2823a"/>
+            <stop offset="100%" stop-color="#c8641f"/>
+          </radialGradient>
+        </defs>
+
+        <g fill="none" stroke="#3f5236" stroke-width="3.5" stroke-linecap="round" opacity="0.85">
+          <path d="M120,238 C90,230 70,205 66,175 C63,150 70,125 84,104"/>
+          <path d="M120,238 C150,230 170,205 174,175 C177,150 170,125 156,104"/>
+        </g>
+        <g fill="#4a6142" opacity="0.85">
+          <ellipse cx="70" cy="190" rx="10" ry="5" transform="rotate(-40 70 190)"/>
+          <ellipse cx="64" cy="165" rx="10" ry="5" transform="rotate(-15 64 165)"/>
+          <ellipse cx="68" cy="140" rx="10" ry="5" transform="rotate(20 68 140)"/>
+          <ellipse cx="80" cy="117" rx="10" ry="5" transform="rotate(45 80 117)"/>
+          <ellipse cx="170" cy="190" rx="10" ry="5" transform="rotate(40 170 190)"/>
+          <ellipse cx="176" cy="165" rx="10" ry="5" transform="rotate(15 176 165)"/>
+          <ellipse cx="172" cy="140" rx="10" ry="5" transform="rotate(-20 172 140)"/>
+          <ellipse cx="160" cy="117" rx="10" ry="5" transform="rotate(-45 160 117)"/>
+        </g>
+
+        <circle cx="68" cy="64" r="32" fill="url(#furGrad)"/>
+        <circle cx="172" cy="64" r="32" fill="url(#furGrad)"/>
+        <circle cx="72" cy="72" r="14" fill="#f6cba9"/>
+        <circle cx="168" cy="72" r="14" fill="#f6cba9"/>
+
+        <ellipse cx="120" cy="148" rx="86" ry="80" fill="url(#furGrad)"/>
+
+        <path d="M96,94 C106,80 114,80 120,96 C126,80 134,80 144,94" fill="none" stroke="#2b1a12" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M104,104 L98,82" fill="none" stroke="#2b1a12" stroke-width="5" stroke-linecap="round"/>
+        <path d="M136,104 L142,82" fill="none" stroke="#2b1a12" stroke-width="5" stroke-linecap="round"/>
+
+        <g id="tigerLeft">
+          <path d="M46,132 C62,140 68,156 58,172" fill="none" stroke="#2b1a12" stroke-width="7" stroke-linecap="round"/>
+          <path d="M40,168 C56,174 62,188 54,200" fill="none" stroke="#2b1a12" stroke-width="6" stroke-linecap="round"/>
+          <path d="M70,112 Q88,102 106,114" fill="none" stroke="#2b1a12" stroke-width="4.5" stroke-linecap="round"/>
+          <ellipse cx="88" cy="132" rx="15" ry="11.5" fill="#f2b429"/>
+          <circle cx="91" cy="133" r="6" fill="#241209"/>
+          <circle cx="94" cy="129" r="2" fill="#fff8ec"/>
+          <g stroke="#2b1a12" stroke-width="1.6" opacity="0.55">
+            <path d="M68,178 L14,170"/>
+            <path d="M70,186 L18,186"/>
+            <path d="M70,194 L18,200"/>
+          </g>
+        </g>
+        <use href="#tigerLeft" transform="translate(240,0) scale(-1,1)"/>
+
+        <ellipse cx="120" cy="184" rx="52" ry="38" fill="#fbf3e2"/>
+        <path d="M120,150 C111,150 106,157 111,163 C114,168 120,172 120,172 C120,172 126,168 129,163 C134,157 129,150 120,150 Z" fill="#3a2117"/>
+        <path d="M120,172 C120,181 111,188 98,186" fill="none" stroke="#3a2117" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M120,172 C120,181 129,188 142,186" fill="none" stroke="#3a2117" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M120,188 L120,206" fill="none" stroke="#2b1a12" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+
+      <p class="footnote"><span class="paw">🐯</span> — you know I'd never give you a lion, so here's a tigress instead.</p>
+    </div>
+  </section>
+
+  <!-- ================= SCREEN 4 : LETTER ================= -->
+  <section id="screen4" class="screen enter-right">
+    <button class="back-btn on-night" onclick="goTo(3)">&larr; back</button>
+    <canvas id="starfield2" class="starfield-canvas"></canvas>
+
+    <div class="letter-card">
+      <div class="fold-line f1"></div>
+      <div class="fold-line f2"></div>
+      <div class="letter-body">
+        <p class="salutation">Dear Nargiz,</p>
+
+        <p>Today you turn 25. It feels like a big number, but somehow it still isn't big enough to describe everything you are.</p>
+
+        <p>I hope this year brings you many good things. You work so hard at the Hilton in Astana, so I hope you also find time to rest, to breathe, and to enjoy small moments. I hope people around you see how special you are. And I hope you keep doing the things that make you happy, simply because they make you happy.</p>
+
+        <p>I still think about the evening I first saw you, in the botanical garden. You were playing tennis, and the light was soft around you. I did not plan to remember it so clearly. But I saw you, and I lost my head. It just happened, and I never wanted it to stop.</p>
+
+        <p>Whatever happens between us, and whatever the future brings — you will always be important to me. No matter what. And I am not sorry, not even a little, that I was there that evening, in that garden, watching you.</p>
+
+        <p>Happy birthday, Nargiz. I wish you all the best today, and always.</p>
+
+        <div class="sign-row">
+          <p class="signature">Merei</p>
+          <svg class="mini-seal" viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <radialGradient id="waxGrad" cx="35%" cy="30%" r="75%">
+                <stop offset="0%" stop-color="#c1543a"/>
+                <stop offset="55%" stop-color="#8f2f22"/>
+                <stop offset="100%" stop-color="#5c1a17"/>
+              </radialGradient>
+              <filter id="waxTex">
+                <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="4" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/>
+              </filter>
+            </defs>
+            <circle cx="50" cy="50" r="42" fill="url(#waxGrad)" filter="url(#waxTex)"/>
+            <text x="50" y="60" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-weight="600" font-size="38" fill="#e9c9a8" opacity=".85">M</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="turn-page-wrap">
+        <button class="turn-page" onclick="goTo(5)">turn the page &rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SCREEN 5 : STARS & NATURE ================= -->
+  <section id="screen5" class="screen enter-right">
+    <button class="back-btn on-night" onclick="goTo(4)">&larr; back</button>
+    <canvas id="starfield" class="starfield-canvas"></canvas>
+
+    <svg class="branch branch-l" viewBox="0 0 200 200"><use href="#branchShape"/></svg>
+    <svg class="branch branch-r" viewBox="0 0 200 200"><use href="#branchShape"/></svg>
+
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <g id="branchShape">
+          <path d="M0,200 C30,160 20,120 60,90 C90,68 70,40 90,10" fill="none" stroke="#3f5236" stroke-width="4" stroke-linecap="round"/>
+          <path d="M0,200 C30,160 20,120 60,90" fill="none" stroke="#3f5236" stroke-width="4"/>
+          <ellipse cx="90" cy="10" rx="10" ry="5" fill="#3f5236" transform="rotate(-30 90 10)"/>
+          <ellipse cx="70" cy="40" rx="9" ry="4.5" fill="#4a6142" transform="rotate(20 70 40)"/>
+          <ellipse cx="90" cy="68" rx="9" ry="4.5" fill="#3f5236" transform="rotate(-15 90 68)"/>
+          <ellipse cx="60" cy="90" rx="10" ry="5" fill="#4a6142" transform="rotate(35 60 90)"/>
+          <ellipse cx="20" cy="120" rx="9" ry="4.5" fill="#3f5236" transform="rotate(-25 20 120)"/>
+          <ellipse cx="30" cy="160" rx="10" ry="5" fill="#4a6142" transform="rotate(15 30 160)"/>
+        </g>
+      </defs>
+    </svg>
+
+    <div class="s3-content">
+      <h2 class="s3-title">for the nights you love most</h2>
+      <p class="s3-intro">✦ a little playlist, and a few of my favorite pictures of you ✦</p>
+
+      <div class="music-row">
+        <div class="player-card player-card-spotify">
+          <p class="track-label">Honeypie — JAWNY</p>
+          <iframe class="spotify-embed" title="Honeypie by JAWNY" src="https://open.spotify.com/embed/track/20iOqB1I037rUtA8WiF0yH?utm_source=generator&theme=0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+
+        <div class="player-card player-card-spotify">
+          <p class="track-label">Silkk da Shocka (feat. Syd) — Isaiah Rashad</p>
+          <iframe class="spotify-embed" title="Silkk da Shocka by Isaiah Rashad feat Syd" src="https://open.spotify.com/embed/track/5f6esnDQcBiFAm8iMfkw12?utm_source=generator&theme=0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+      </div>
+      <p class="music-note">tip: sign in inside the player above (free account works) to hear each full song right here</p>
+
+      <h3 class="section-title">my favorite photos of you</h3>
+      <div class="photo-grid">
+        <div class="photo-frame"><img src="photos/1.jpg" alt="Nargiz, photo 1" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'photo-fallback',textContent:'photo 1'}))"></div>
+        <div class="photo-frame"><img src="photos/2.jpg" alt="Nargiz, photo 2" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'photo-fallback',textContent:'photo 2'}))"></div>
+        <div class="photo-frame"><img src="photos/3.jpg" alt="Nargiz, photo 3" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'photo-fallback',textContent:'photo 3'}))"></div>
+        <div class="photo-frame"><img src="photos/4.jpg" alt="Nargiz, photo 4" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'photo-fallback',textContent:'photo 4'}))"></div>
+        <div class="photo-frame"><img src="photos/5.jpg" alt="Nargiz, photo 5" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'photo-fallback',textContent:'photo 5'}))"></div>
+        <div class="photo-frame"><img src="photos/6.jpg" alt="Nargiz, photo 6" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'photo-fallback',textContent:'photo 6'}))"></div>
+      </div>
+
+      <div class="s5-more">
+        <button class="turn-page on-dark" onclick="goTo(6)">one more thing &rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SCREEN 6 : DINO GAME ================= -->
+  <section id="screen6" class="screen enter-right">
+    <button class="back-btn on-paper" onclick="goTo(5)">&larr; back</button>
+    <div class="dino-content">
+      <h2 class="section-heading">relax and play a little 🦕</h2>
+      <p class="intro-line" style="margin-bottom:0;">tap, click, or press space to jump</p>
+      <div class="dino-wrap">
+        <canvas id="dinoCanvas"></canvas>
+        <div class="dino-score">
+          <span class="dino-hi" id="dinoHi">HI 0</span>
+          <span class="dino-current" id="dinoCurrent">0</span>
+        </div>
+        <div class="dino-overlay" id="dinoOverlay"><p>tap to start</p></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ---------------- Navigation (bidirectional, screens stay mounted so Spotify audio never stops) ---------------- */
+let current = 1;
+function goTo(target){
+  if(target === current) return;
+  const forward = target > current;
+  const curEl = document.getElementById('screen'+current);
+  const nextEl = document.getElementById('screen'+target);
+
+  nextEl.classList.remove('active','exit-left','exit-right');
+  nextEl.classList.add(forward ? 'enter-right' : 'enter-left');
+  void nextEl.offsetWidth; // force reflow so starting position is registered
+
+  curEl.classList.remove('active');
+  curEl.classList.add(forward ? 'exit-left' : 'exit-right');
+
+  nextEl.classList.remove('enter-right','enter-left');
+  nextEl.classList.add('active');
+
+  setTimeout(()=>{
+    curEl.classList.remove('exit-left','exit-right');
+    if(target === 3) resetEnvelope();
+  }, 1550);
+
+  current = target;
+}
+
+/* ---------------- Password gate ---------------- */
+(function(){
+  const PASSCODE = '1708';
+  const digits = [...document.querySelectorAll('.pw-digit')];
+  const pwHint = document.getElementById('pwHint');
+  const pwDigitsWrap = document.getElementById('pwDigits');
+  let wrongTries = 0;
+
+  digits.forEach((inp, i) => {
+    inp.addEventListener('input', () => {
+      inp.value = inp.value.replace(/[^0-9]/g,'').slice(0,1);
+      if(inp.value && i < digits.length-1) digits[i+1].focus();
+      if(digits.every(d=>d.value)) tryUnlock();
+    });
+    inp.addEventListener('keydown', (e) => {
+      if(e.key === 'Backspace' && !inp.value && i>0) digits[i-1].focus();
+      if(e.key === 'Enter') tryUnlock();
+    });
+  });
+  document.getElementById('pwUnlock').addEventListener('click', tryUnlock);
+
+  function tryUnlock(){
+    const code = digits.map(d=>d.value).join('');
+    if(code.length < 4) return;
+    if(code === PASSCODE){
+      digits.forEach(d => { d.disabled = true; d.blur(); });
+      document.getElementById('pwUnlock').disabled = true;
+      setTimeout(() => goTo(2), 550);
+    } else {
+      wrongTries++;
+      pwDigitsWrap.classList.remove('shake');
+      void pwDigitsWrap.offsetWidth;
+      pwDigitsWrap.classList.add('shake');
+      if(wrongTries >= 1) pwHint.classList.add('show');
+      digits.forEach(d=> d.value = '');
+      digits[0].focus();
+    }
+  }
+})();
+
+/* ---------------- Digital flower bouquet ---------------- */
+(function(){
+  const wishes = [
+    { type:'rose',  msg:"May this year bring you soft mornings and easy, happy days." },
+    { type:'peony', msg:"You deserve every good thing you've never said out loud." },
+    { type:'rose',  msg:"Stay exactly this kind, this bright, this wonderfully you." },
+    { type:'peony', msg:"I hope Astana feels warmer knowing how loved you are." },
+    { type:'rose',  msg:"Rest more this year — you've earned every quiet moment." },
+    { type:'peony', msg:"Here's to tennis evenings, botanical gardens, and everything after." },
+    { type:'rose',  msg:"You make ordinary days feel worth remembering, every single time." },
+    { type:'peony', msg:"Happy 25th, Nargiz. Your best chapters haven't opened yet." },
+    { type:'rose',  msg:"Wishing you golden light and softer, slower Sundays this year." },
+    { type:'peony', msg:"You're the kind of good that doesn't ask to be seen." },
+    { type:'rose',  msg:"May every hard day be followed by an easier one." },
+    { type:'peony', msg:"Here's to more laughing until your stomach actually hurts." },
+    { type:'rose',  msg:"I hope you dance in your kitchen more this year." },
+    { type:'peony', msg:"You've grown into someone even your younger self would admire." },
+    { type:'rose',  msg:"Twenty-five looks so good on you, Nargiz." }
+  ];
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const group = document.getElementById('bouquetFlowers');
+  const msgText = document.getElementById('bouquetMsgText');
+  const baseX = 200, baseY = 360;
+  const n = wishes.length;
+
+  wishes.forEach((w, i) => {
+    const t = n === 1 ? 0.5 : i / (n - 1);
+    const angle = -62 + t * 124;
+    const scale = 0.6 + (i % 3) * 0.07;
+
+    const btn = document.createElementNS(svgNS, 'g');
+    btn.setAttribute('class', 'flower-btn');
+    btn.setAttribute('tabindex', '0');
+    btn.setAttribute('role', 'button');
+    btn.setAttribute('aria-label', 'reveal a birthday wish');
+    btn.setAttribute('transform', `translate(${baseX},${baseY}) rotate(${angle.toFixed(2)}) scale(${scale.toFixed(2)}) translate(-50,-138)`);
+
+    const inner = document.createElementNS(svgNS, 'g');
+    inner.setAttribute('class', 'flower-inner');
+
+    const use = document.createElementNS(svgNS, 'use');
+    use.setAttribute('href', w.type === 'rose' ? '#flowerRose' : '#flowerPeony');
+    use.setAttribute('width', '100');
+    use.setAttribute('height', '140');
+    use.setAttribute('class', 'flower-use');
+
+    inner.appendChild(use);
+    btn.appendChild(inner);
+    group.appendChild(btn);
+
+    function activate(){
+      document.querySelectorAll('.flower-btn.selected').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      msgText.style.opacity = 0;
+      setTimeout(() => { msgText.textContent = w.msg; msgText.style.opacity = 1; }, 150);
+    }
+    btn.addEventListener('click', activate);
+    btn.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); activate(); }
+    });
+  });
+})();
+
+/* ---------------- Envelope open sequence ---------------- */
+function resetEnvelope(){
+  const wrap = document.getElementById('envelopeWrap');
+  wrap.classList.remove('opening','cracking');
+}
+document.getElementById('sealBtn').addEventListener('click', () => {
+  const wrap = document.getElementById('envelopeWrap');
+  if(wrap.classList.contains('cracking')) return;
+  wrap.classList.add('cracking');
+  setTimeout(()=> wrap.classList.add('opening'), 260);
+  setTimeout(()=> goTo(4), 1350);
+});
+
+/* ---------------- Starfield (shared by the letter screen and the stars screen) ---------------- */
+function makeStarfield(canvasId){
+  let inited = false;
+  return function init(){
+    if(inited) return;
+    inited = true;
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize(){
+      canvas.width = canvas.clientWidth * devicePixelRatio;
+      canvas.height = canvas.clientHeight * devicePixelRatio;
+      const count = Math.floor((canvas.clientWidth * canvas.clientHeight) / 3800);
+      stars = Array.from({length: count}, () => ({
+        x: Math.random()*canvas.width,
+        y: Math.random()*canvas.height,
+        r: (Math.random()*1.3 + .3) * devicePixelRatio,
+        phase: Math.random()*Math.PI*2,
+        speed: Math.random()*.015 + .006
+      }));
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function frame(t){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      for(const s of stars){
+        const tw = .5 + .5*Math.sin(t*s.speed + s.phase);
+        ctx.globalAlpha = .25 + tw*.75;
+        ctx.fillStyle = '#f4ecd8';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  };
+}
+const initStars = makeStarfield('starfield');
+const initStars2 = makeStarfield('starfield2');
+
+document.getElementById('screen5').addEventListener('transitionstart', () => {
+  if(document.getElementById('screen5').classList.contains('active')) initStars();
+});
+document.getElementById('screen4').addEventListener('transitionstart', () => {
+  if(document.getElementById('screen4').classList.contains('active')) initStars2();
+});
+setTimeout(() => {
+  if(current === 5) initStars();
+  if(current === 4) initStars2();
+}, 50);
+
+/* ---------------- Dino game (original mini clone for the offline-style easter egg) ---------------- */
+(function(){
+  const canvas = document.getElementById('dinoCanvas');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('dinoOverlay');
+  const currentEl = document.getElementById('dinoCurrent');
+  const hiEl = document.getElementById('dinoHi');
+  let highScore = parseInt(localStorage.getItem('nargizDinoHigh') || '0', 10);
+  hiEl.textContent = 'HI ' + highScore;
+  let running = false, W, H, frameCount = 0;
+  let dino, obstacles, speed, score, spawnTimer;
+
+  function fit(){
+    const rect = canvas.getBoundingClientRect();
+    W = canvas.width = Math.max(1, rect.width * devicePixelRatio);
+    H = canvas.height = Math.max(1, rect.height * devicePixelRatio);
+  }
+  window.addEventListener('resize', fit);
+
+  const groundY = () => H*0.82;
+
+  function reset(){
+    fit();
+    const dpr = devicePixelRatio;
+    dino = { x: W*0.08, y: groundY()-40*dpr, w:34*dpr, h:40*dpr, vy:0, jumping:false };
+    obstacles = [];
+    speed = 5*dpr;
+    score = 0;
+    spawnTimer = 40;
+    frameCount = 0;
+    currentEl.textContent = '0';
+  }
+
+  function jump(){
+    if(!running){ start(); return; }
+    if(!dino.jumping){
+      dino.vy = -13*devicePixelRatio;
+      dino.jumping = true;
+    }
+  }
+
+  function start(){
+    reset();
+    running = true;
+    overlay.classList.add('hidden');
+    requestAnimationFrame(loop);
+  }
+
+  function endGame(){
+    running = false;
+    const finalScore = Math.floor(score);
+    let msg = 'game over — score ' + finalScore + ' — tap to try again';
+    if(finalScore > highScore){
+      highScore = finalScore;
+      localStorage.setItem('nargizDinoHigh', highScore);
+      hiEl.textContent = 'HI ' + highScore;
+      msg = 'new best! score ' + finalScore + ' — tap to try again';
+    }
+    overlay.querySelector('p').textContent = msg;
+    overlay.classList.remove('hidden');
+  }
+
+  function loop(){
+    if(!running) return;
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function update(){
+    const dpr = devicePixelRatio;
+    dino.vy += 0.7*dpr;
+    dino.y += dino.vy;
+    const gy = groundY()-dino.h;
+    if(dino.y > gy){ dino.y = gy; dino.vy = 0; dino.jumping = false; }
+
+    spawnTimer -= 1;
+    if(spawnTimer <= 0){
+      const h = (18+Math.random()*22)*dpr;
+      obstacles.push({ x:W+10, y:groundY()-h, w:(10+Math.random()*10)*dpr, h });
+      spawnTimer = Math.max(28, 70 - speed*2.2);
+    }
+    obstacles.forEach(o => o.x -= speed);
+    obstacles = obstacles.filter(o => o.x + o.w > 0);
+
+    for(const o of obstacles){
+      if(dino.x < o.x+o.w-4*dpr && dino.x+dino.w-4*dpr > o.x && dino.y < o.y+o.h && dino.y+dino.h > o.y+4*dpr){
+        endGame();
+        return;
+      }
+    }
+
+    score += 0.12;
+    speed += 0.002*dpr;
+    frameCount += 1;
+    currentEl.textContent = Math.floor(score);
+  }
+
+  function draw(){
+    const dpr = devicePixelRatio;
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle = '#5b4632';
+    ctx.lineWidth = 2*dpr;
+    ctx.beginPath();
+    ctx.moveTo(0, groundY());
+    ctx.lineTo(W, groundY());
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(182,144,90,.35)';
+    ctx.beginPath();
+    ctx.arc(W*0.85, H*0.22, 22*dpr, 0, Math.PI*2);
+    ctx.fill();
+
+    drawDino(dino.x, dino.y, dino.w, dino.h, dpr);
+
+    ctx.fillStyle = '#3f5236';
+    obstacles.forEach(o => { roundRect(o.x, o.y, o.w, o.h, 2*dpr); ctx.fill(); });
+  }
+
+  function drawDino(x, y, w, h, dpr){
+    ctx.fillStyle = '#3a2c1e';
+
+    // tail
+    ctx.beginPath();
+    ctx.moveTo(x, y+h*0.5);
+    ctx.lineTo(x-w*0.32, y+h*0.32);
+    ctx.lineTo(x, y+h*0.66);
+    ctx.closePath();
+    ctx.fill();
+
+    // body
+    roundRect(x, y+h*0.14, w*0.78, h*0.54, w*0.18);
+    ctx.fill();
+
+    // head + neck
+    roundRect(x+w*0.5, y-h*0.02, w*0.55, h*0.4, w*0.14);
+    ctx.fill();
+    ctx.fillRect(x+w*0.92, y+h*0.1, w*0.2, h*0.14);
+
+    // eye
+    ctx.fillStyle = '#f1e6c9';
+    ctx.fillRect(x+w*0.9, y+h*0.06, h*0.06, h*0.06);
+    ctx.fillStyle = '#3a2c1e';
+
+    // small arm
+    ctx.fillRect(x+w*0.58, y+h*0.4, w*0.12, h*0.1);
+
+    // legs — alternate a running gait, tuck them together mid-air
+    const legW = w*0.2, legH = h*0.34;
+    const legY = y+h*0.6;
+    if(dino.jumping){
+      ctx.fillRect(x+w*0.14, legY+h*0.05, legW, legH*0.8);
+      ctx.fillRect(x+w*0.42, legY+h*0.05, legW, legH*0.8);
+    } else {
+      const stride = Math.floor(frameCount/6)%2===0;
+      ctx.fillRect(x+w*0.14, legY+(stride?0:h*0.07), legW, legH);
+      ctx.fillRect(x+w*0.42, legY+(stride?h*0.07:0), legW, legH);
+    }
+  }
+
+  overlay.addEventListener('click', jump);
+  canvas.addEventListener('click', jump);
+  window.addEventListener('keydown', (e) => {
+    if(e.code === 'Space' && document.getElementById('screen6').classList.contains('active')){
+      e.preventDefault();
+      jump();
+    }
+  });
+
+  reset();
+  draw();
+})();
+</script>
+</body>
+</html>
