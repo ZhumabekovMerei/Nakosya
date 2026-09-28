@@ -1028,17 +1028,47 @@
       <p class="s3-intro">✦ a little playlist, and a few of my favorite pictures of you ✦</p>
 
       <div class="music-row">
-        <div class="player-card player-card-spotify">
-          <p class="track-label">Honeypie — JAWNY</p>
-          <iframe class="spotify-embed" title="Honeypie by JAWNY" src="https://open.spotify.com/embed/track/20iOqB1I037rUtA8WiF0yH?utm_source=generator&theme=0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        <div class="player-card" data-track="honeypie">
+          <div class="player-top">
+            <div class="player-art"><img src="audio/honeypie-cover.jpg" alt="" loading="lazy"></div>
+            <div class="player-meta">
+              <p class="player-title">Honeypie</p>
+              <p class="player-artist">JAWNY</p>
+            </div>
+            <button class="player-play" type="button" aria-label="Play Honeypie">
+              <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z" fill="currentColor"/></svg>
+            </button>
+          </div>
+          <div class="player-progress-row">
+            <span class="player-time player-time-current">0:00</span>
+            <input class="player-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek Honeypie">
+            <span class="player-time player-time-duration">0:00</span>
+          </div>
+          <audio class="player-audio" src="audio/honeypie.mp3" preload="metadata"></audio>
         </div>
 
-        <div class="player-card player-card-spotify">
-          <p class="track-label">Silkk da Shocka (feat. Syd) — Isaiah Rashad</p>
-          <iframe class="spotify-embed" title="Silkk da Shocka by Isaiah Rashad feat Syd" src="https://open.spotify.com/embed/track/5f6esnDQcBiFAm8iMfkw12?utm_source=generator&theme=0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        <div class="player-card" data-track="silkk">
+          <div class="player-top">
+            <div class="player-art"><img src="audio/silkk-cover.jpg" alt="" loading="lazy"></div>
+            <div class="player-meta">
+              <p class="player-title">Silkk da Shocka</p>
+              <p class="player-artist">Isaiah Rashad, Syd</p>
+            </div>
+            <button class="player-play" type="button" aria-label="Play Silkk da Shocka">
+              <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z" fill="currentColor"/></svg>
+            </button>
+          </div>
+          <div class="player-progress-row">
+            <span class="player-time player-time-current">0:00</span>
+            <input class="player-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek Silkk da Shocka">
+            <span class="player-time player-time-duration">0:00</span>
+          </div>
+          <audio class="player-audio" src="audio/silkk-da-shocka.mp3" preload="metadata"></audio>
         </div>
       </div>
-      <p class="music-note">tip: sign in inside the player above (free account works) to hear each full song right here</p>
+      <p class="music-note">tap play to listen right here — drag the bar to jump to any part of the song</p>
 
       <h3 class="section-title">my favorite photos of you</h3>
       <div class="photo-grid">
@@ -1218,6 +1248,80 @@ document.getElementById('sealBtn').addEventListener('click', () => {
   setTimeout(()=> wrap.classList.add('opening'), 260);
   setTimeout(()=> goTo(4), 1350);
 });
+
+/* ---------------- Music players ---------------- */
+(function(){
+  function formatTime(sec){
+    if(!isFinite(sec) || sec < 0) sec = 0;
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + String(s).padStart(2,'0');
+  }
+
+  const cards = [...document.querySelectorAll('.player-card')];
+  const players = cards.map(card => ({
+    card,
+    audio: card.querySelector('.player-audio'),
+    playBtn: card.querySelector('.player-play'),
+    seek: card.querySelector('.player-seek'),
+    curTime: card.querySelector('.player-time-current'),
+    durTime: card.querySelector('.player-time-duration'),
+    seeking: false
+  }));
+
+  function pauseAllExcept(keep){
+    players.forEach(p => {
+      if(p !== keep && !p.audio.paused){
+        p.audio.pause();
+      }
+    });
+  }
+
+  players.forEach(p => {
+    p.playBtn.addEventListener('click', () => {
+      if(p.audio.paused){
+        pauseAllExcept(p);
+        p.audio.play();
+      } else {
+        p.audio.pause();
+      }
+    });
+
+    p.audio.addEventListener('play', () => p.playBtn.classList.add('playing'));
+    p.audio.addEventListener('pause', () => p.playBtn.classList.remove('playing'));
+
+    p.audio.addEventListener('loadedmetadata', () => {
+      p.durTime.textContent = formatTime(p.audio.duration);
+    });
+
+    p.audio.addEventListener('timeupdate', () => {
+      if(p.seeking) return;
+      p.curTime.textContent = formatTime(p.audio.currentTime);
+      if(p.audio.duration){
+        p.seek.value = String((p.audio.currentTime / p.audio.duration) * 1000);
+      }
+    });
+
+    p.audio.addEventListener('ended', () => {
+      p.playBtn.classList.remove('playing');
+      p.seek.value = 0;
+      p.curTime.textContent = '0:00';
+    });
+
+    p.seek.addEventListener('input', () => {
+      p.seeking = true;
+      if(p.audio.duration){
+        p.curTime.textContent = formatTime((p.seek.value / 1000) * p.audio.duration);
+      }
+    });
+    p.seek.addEventListener('change', () => {
+      if(p.audio.duration){
+        p.audio.currentTime = (p.seek.value / 1000) * p.audio.duration;
+      }
+      p.seeking = false;
+    });
+  });
+})();
 
 /* ---------------- Starfield (shared by the letter screen and the stars screen) ---------------- */
 function makeStarfield(canvasId){
