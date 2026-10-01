@@ -1731,8 +1731,9 @@ setTimeout(() => {
       while(n < 3 && (n + 1) * w * 1.2 < maxRange) n++;
       const parts = [];
       let cx = W + 10;
+      const partY = groundY() - h;
       for(let i = 0; i < n; i++){
-        parts.push({ x: cx, w, h });
+        parts.push({ x: cx, w, h, y: partY });
         cx += w + R(4);
       }
       const totalW = cx - (W + 10) - R(4);
