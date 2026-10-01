@@ -1639,10 +1639,17 @@ setTimeout(() => {
   hiEl.textContent = 'HI ' + pad(highScore);
   currentEl.textContent = pad(0);
 
-  // All sizes/speeds below are tuned for a REF_H-tall canvas, then scaled by
-  // (actual CSS height / REF_H) so the game feels the same on any screen.
+  // The whole game runs in a FIXED logical coordinate system (GAME_W x GAME_H),
+  // completely independent of the canvas's real on-screen pixel size. This is
+  // what guarantees the reaction-time fairness math below actually holds —
+  // if positions/speeds were computed in real CSS pixels, a narrow phone
+  // screen would shrink the canvas and the travel distance from "obstacle
+  // just spawned off-screen" to "reaches the dino" would shrink right along
+  // with it, silently erasing the player's reaction time. Drawing maps this
+  // fixed space onto whatever canvas size exists via a scale transform, so
+  // gameplay feels identical on any screen.
+  const GAME_W = 600, GAME_H = 150;
   const CFG = {
-    REF_H: 150,
     GRAVITY: 0.6,
     DUCK_GRAVITY_MULT: 2.6,
     JUMP_VELOCITY: 10.5,
@@ -1664,34 +1671,33 @@ setTimeout(() => {
 
   const STEP = 1000 / 60;
 
-  let running = false, W = 0, H = 0, scale = 1;
+  let running = false, cssW = 0, cssH = 0;
   let dino, obstacles, speed, score, spawnCountdown, frame, nightMode, lastNightAt, duckHeld;
   let rafId = null, lastTs = null, accumulator = 0;
 
-  const R = v => v * scale;
-  const groundY = () => H - R(CFG.GROUND_PAD);
+  const groundY = () => GAME_H - CFG.GROUND_PAD;
 
   function fit(){
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    W = rect.width;
-    H = rect.height;
-    canvas.width = Math.max(1, Math.round(W * dpr));
-    canvas.height = Math.max(1, Math.round(H * dpr));
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    scale = H / CFG.REF_H;
+    cssW = rect.width;
+    cssH = rect.height;
+    canvas.width = Math.max(1, Math.round(cssW * dpr));
+    canvas.height = Math.max(1, Math.round(cssH * dpr));
+    const scaleX = cssW / GAME_W, scaleY = cssH / GAME_H;
+    ctx.setTransform(dpr * scaleX, 0, 0, dpr * scaleY, 0, 0);
   }
   window.addEventListener('resize', fit);
 
   function reset(){
     fit();
     dino = {
-      x: R(18), y: 0, w: R(CFG.DINO_W), h: R(CFG.DINO_H),
+      x: 18, y: 0, w: CFG.DINO_W, h: CFG.DINO_H,
       vy: 0, grounded: true, ducking: false, blinkIn: 90 + Math.random() * 150
     };
     dino.y = groundY() - dino.h;
     obstacles = [];
-    speed = R(CFG.START_SPEED);
+    speed = CFG.START_SPEED;
     score = 0;
     frame = 0;
     nightMode = false;
@@ -1701,43 +1707,54 @@ setTimeout(() => {
     currentEl.textContent = pad(0);
   }
 
-  // Horizontal distance a jump actually covers at the current speed —
-  // obstacle clusters are capped against this so a clean jump always clears them.
-  function jumpRangePx(){
-    const v = R(CFG.JUMP_VELOCITY), g = R(CFG.GRAVITY);
-    const airFrames = (2 * v) / g;
-    return speed * airFrames * 0.8;
+  // Max cluster width a jump can clear over an obstacle of the given height.
+  // Not the whole jump arc — only the window where the dino's belly clears
+  // that height (start/end of a jump are no higher off the ground than
+  // standing). Solve y(t) = standTop - v*t + 0.5*g*t^2 <= standTop - h for t
+  // (reduces to v^2 - 2*g*h under the root) to get that window [t1,t2], then
+  // subtract the dino's own width: the cluster has to finish passing under
+  // the dino's whole body within that window, not just clear a single point.
+  // The 0.6 factor leaves real margin for imperfect human timing, since this
+  // is a timing window, not just a size check.
+  function jumpClearRangePx(obstacleH){
+    const v = CFG.JUMP_VELOCITY, g = CFG.GRAVITY;
+    const disc = v * v - 2 * g * obstacleH;
+    if(disc <= 0) return 0;
+    const sq = Math.sqrt(disc);
+    const t1 = (v - sq) / g, t2 = (v + sq) / g;
+    const clearWindowPx = speed * (t2 - t1);
+    return Math.max(0, (clearWindowPx - CFG.DINO_W) * 0.6);
   }
 
   function scheduleNextObstacle(){
     const gapFrames = CFG.MIN_REACTION_FRAMES + Math.random() * CFG.EXTRA_GAP_FRAMES;
-    spawnCountdown = Math.max(speed * gapFrames, R(40));
+    spawnCountdown = Math.max(speed * gapFrames, 40);
   }
 
   function spawnObstacle(){
     const usePtero = score > CFG.PTERO_SCORE_UNLOCK && Math.random() < CFG.PTERO_CHANCE;
     if(usePtero){
       const variant = Math.random() < 0.5 ? 'duck' : 'low';
-      const w = R(CFG.PTERO_W), h = R(CFG.PTERO_H);
+      const w = CFG.PTERO_W, h = CFG.PTERO_H;
       const y = variant === 'duck'
-        ? groundY() - R(CFG.DUCK_H) - (R(CFG.DINO_H) - R(CFG.DUCK_H)) * 0.55 - h * 0.5
+        ? groundY() - CFG.DUCK_H - (CFG.DINO_H - CFG.DUCK_H) * 0.55 - h * 0.5
         : groundY() - h * 0.85;
-      obstacles.push({ type:'ptero', variant, x: W + 10, y, w, h, totalW: w, flap: Math.random() < 0.5 });
+      obstacles.push({ type:'ptero', variant, x: GAME_W + 10, y, w, h, totalW: w, flap: Math.random() < 0.5 });
     } else {
       const base = Math.random() < 0.55 ? CFG.CACTUS_SMALL : CFG.CACTUS_LARGE;
-      const w = R(base.w), h = R(base.h);
-      const maxRange = jumpRangePx();
+      const w = base.w, h = base.h;
+      const maxRange = jumpClearRangePx(h);
       let n = 1;
-      while(n < 3 && (n + 1) * w * 1.2 < maxRange) n++;
+      while(n < 3 && ((n + 1) * w + n * 4) * 1.15 < maxRange) n++;
       const parts = [];
-      let cx = W + 10;
+      let cx = GAME_W + 10;
       const partY = groundY() - h;
       for(let i = 0; i < n; i++){
         parts.push({ x: cx, w, h, y: partY });
-        cx += w + R(4);
+        cx += w + 4;
       }
-      const totalW = cx - (W + 10) - R(4);
-      obstacles.push({ type:'cactus', x: W + 10, y: groundY() - h, w, h, parts, totalW });
+      const totalW = cx - (GAME_W + 10) - 4;
+      obstacles.push({ type:'cactus', x: GAME_W + 10, y: groundY() - h, w, h, parts, totalW });
     }
     scheduleNextObstacle();
   }
@@ -1745,7 +1762,7 @@ setTimeout(() => {
   function jump(){
     if(!running){ start(); return; }
     if(dino.grounded && !dino.ducking){
-      dino.vy = -R(CFG.JUMP_VELOCITY);
+      dino.vy = -CFG.JUMP_VELOCITY;
       dino.grounded = false;
     }
   }
@@ -1813,33 +1830,33 @@ setTimeout(() => {
     frame++;
 
     const inAirDuck = duckHeld && !dino.grounded;
-    const g = R(CFG.GRAVITY) * (inAirDuck ? CFG.DUCK_GRAVITY_MULT : 1);
+    const g = CFG.GRAVITY * (inAirDuck ? CFG.DUCK_GRAVITY_MULT : 1);
     dino.vy += g;
     dino.y += dino.vy;
-    const standTop = groundY() - (dino.ducking ? R(CFG.DUCK_H) : R(CFG.DINO_H));
+    const standTop = groundY() - (dino.ducking ? CFG.DUCK_H : CFG.DINO_H);
     if(dino.y > standTop){ dino.y = standTop; dino.vy = 0; dino.grounded = true; }
 
     const wantDuck = duckHeld && dino.grounded;
     if(wantDuck !== dino.ducking){
       dino.ducking = wantDuck;
-      dino.h = wantDuck ? R(CFG.DUCK_H) : R(CFG.DINO_H);
-      dino.w = wantDuck ? R(CFG.DUCK_W) : R(CFG.DINO_W);
+      dino.h = wantDuck ? CFG.DUCK_H : CFG.DINO_H;
+      dino.w = wantDuck ? CFG.DUCK_W : CFG.DINO_W;
       dino.y = groundY() - dino.h;
     }
 
-    if(speed < R(CFG.MAX_SPEED)) speed = Math.min(R(CFG.MAX_SPEED), speed + R(CFG.ACCEL));
+    if(speed < CFG.MAX_SPEED) speed = Math.min(CFG.MAX_SPEED, speed + CFG.ACCEL);
     score += speed * 0.025;
     currentEl.textContent = pad(score);
 
     spawnCountdown -= speed;
     obstacles.forEach(o => o.x -= speed);
     obstacles.forEach(o => {
-      if(o.type === 'cactus') o.parts.forEach((p,i) => { p.x = o.x + i * (p.w + R(4)); });
+      if(o.type === 'cactus') o.parts.forEach((p,i) => { p.x = o.x + i * (p.w + 4); });
     });
     obstacles = obstacles.filter(o => o.x + o.totalW > -5);
     if(spawnCountdown <= 0) spawnObstacle();
 
-    const dinoBox = { x: dino.x + R(4), y: dino.y + R(4), w: dino.w - R(8), h: dino.h - R(8) };
+    const dinoBox = { x: dino.x + 4, y: dino.y + 4, w: dino.w - 8, h: dino.h - 8 };
     for(const o of obstacles){
       if(o.type === 'cactus'){
         for(const p of o.parts){ if(rectsOverlap(dinoBox, p)){ endGame(); return; } }
@@ -1867,24 +1884,24 @@ setTimeout(() => {
     const accent = night ? 'rgba(241,230,201,.35)' : 'rgba(182,144,90,.35)';
 
     ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, GAME_W, GAME_H);
 
     ctx.strokeStyle = night ? '#6b5c3f' : '#5b4632';
-    ctx.lineWidth = Math.max(1, R(2));
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, groundY());
-    ctx.lineTo(W, groundY());
+    ctx.lineTo(GAME_W, groundY());
     ctx.stroke();
 
     ctx.fillStyle = accent;
     if(night){
       for(let i=0;i<6;i++){
-        const sx = (i*83 + (frame*0.05))%W;
-        ctx.fillRect(sx, R(14)+((i*37)%R(40)), R(2), R(2));
+        const sx = (i*83 + (frame*0.05))%GAME_W;
+        ctx.fillRect(sx, 14+((i*37)%40), 2, 2);
       }
     } else {
       ctx.beginPath();
-      ctx.arc(W*0.85, H*0.22, R(16), 0, Math.PI*2);
+      ctx.arc(GAME_W*0.85, GAME_H*0.22, 16, 0, Math.PI*2);
       ctx.fill();
     }
 
@@ -1893,7 +1910,7 @@ setTimeout(() => {
     ctx.fillStyle = fg;
     obstacles.forEach(o => {
       if(o.type === 'cactus'){
-        o.parts.forEach(p => roundRect(p.x, o.y + (o.h-p.h), p.w, p.h, R(2)));
+        o.parts.forEach(p => roundRect(p.x, o.y + (o.h-p.h), p.w, p.h, 2));
         ctx.fill();
       } else {
         drawPtero(o, fg);
@@ -1906,7 +1923,7 @@ setTimeout(() => {
     ctx.fillStyle = fg;
     const x=o.x, y=o.y, w=o.w, h=o.h;
     const up = Math.floor(frame/8)%2===0;
-    roundRect(x+w*0.3, y+h*0.35, w*0.4, h*0.3, R(3));
+    roundRect(x+w*0.3, y+h*0.35, w*0.4, h*0.3, 3);
     ctx.fill();
     ctx.beginPath();
     if(up){
