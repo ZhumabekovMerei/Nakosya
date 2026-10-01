@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3f5236"/>
+      <stop offset="100%" stop-color="#1e2a18"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#g)"/>
+  <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(217,185,126,.22)" stroke-width="2"/>
+  <circle cx="100" cy="100" r="47" fill="none" stroke="rgba(217,185,126,.16)" stroke-width="2"/>
+  <circle cx="100" cy="100" r="34" fill="none" stroke="rgba(217,185,126,.12)" stroke-width="2"/>
+  <circle cx="100" cy="100" r="21" fill="rgba(182,144,90,.32)"/>
+  <circle cx="100" cy="100" r="6" fill="#1e2a18"/>
+  <text x="100" y="186" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="13" fill="rgba(217,185,126,.75)">The Neighbourhood</text>
+</svg>
