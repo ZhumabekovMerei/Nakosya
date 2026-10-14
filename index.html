@@ -868,6 +868,218 @@
   @media (prefers-reduced-motion: reduce){
     .page-nav{ transition:opacity .2s linear; }
   }
+
+  /* ================= SCREEN 7 — CHESS SCHOOL ================= */
+  #screen7{
+    background:
+      radial-gradient(ellipse at 25% 0%, rgba(199,107,115,.10), transparent 45%),
+      linear-gradient(160deg, var(--paper) 0%, var(--paper-shadow) 55%, var(--paper-dark) 100%);
+  }
+  .chess-content{ position:relative; z-index:2; max-width:640px; margin:0 auto; text-align:center; width:100%; }
+  .chess-sub{ color:var(--ink-soft); font-size:.95rem; max-width:40ch; margin:0 auto clamp(14px,3vh,22px); }
+
+  /* ---- overall course progress ---- */
+  .course-bar{
+    width:min(420px,88vw);
+    height:8px;
+    margin:0 auto clamp(20px,4vh,30px);
+    border-radius:6px;
+    background:rgba(90,60,20,.14);
+    overflow:hidden;
+  }
+  .course-bar-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--wax-dark), var(--wax-bright));
+    border-radius:6px;
+    transition:width .5s cubic-bezier(.4,1,.4,1);
+  }
+
+  /* ---- lesson map (duolingo-ish winding path) ---- */
+  .lesson-map{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    padding:4px 0 8px;
+  }
+  .lesson-row{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+  }
+  .lesson-row.off-l{ align-items:flex-start; padding-left:20%; }
+  .lesson-row.off-r{ align-items:flex-end; padding-right:20%; }
+  .lesson-node{
+    position:relative;
+    width:62px; height:62px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.7rem;
+    border:none;
+    background:linear-gradient(160deg,#efe0b8,#d9b97e);
+    box-shadow:0 6px 0 #9c7a44, 0 8px 14px rgba(60,40,10,.3);
+    color:var(--wax-dark);
+    transition:transform .15s ease;
+  }
+  .lesson-node:active{ transform:translateY(3px); box-shadow:0 3px 0 #9c7a44, 0 5px 10px rgba(60,40,10,.3); }
+  .lesson-node.locked{
+    background:linear-gradient(160deg,#e4dcc6,#cfc6ac);
+    box-shadow:0 6px 0 #a79e87, 0 8px 14px rgba(60,40,10,.18);
+    color:#8c8268;
+    cursor:not-allowed;
+  }
+  .lesson-node.current{ animation:lessonPulse 1.8s ease-in-out infinite; }
+  @keyframes lessonPulse{
+    0%,100%{ box-shadow:0 6px 0 #9c7a44, 0 8px 14px rgba(60,40,10,.3), 0 0 0 0 rgba(168,64,47,.35); }
+    50%{ box-shadow:0 6px 0 #9c7a44, 0 8px 14px rgba(60,40,10,.3), 0 0 0 10px rgba(168,64,47,0); }
+  }
+  .lesson-node .stars{
+    position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+    font-size:.7rem; letter-spacing:1px; color:var(--gold);
+    text-shadow:0 1px 0 rgba(255,255,255,.5);
+    white-space:nowrap;
+  }
+  .lesson-node .lock-icon{ font-size:1.3rem; }
+  .lesson-label{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:.78rem;
+    text-align:center;
+    margin-top:4px;
+    max-width:84px;
+  }
+
+  /* ---- lesson play view ---- */
+  .lesson-play{ display:none; }
+  .lesson-play.active{ display:block; }
+  .lesson-map-view.hidden{ display:none; }
+  .lesson-back-row{
+    display:flex; align-items:center; justify-content:center;
+    gap:10px; margin-bottom:6px;
+  }
+  .lesson-title{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-weight:600;
+    color:var(--wax-dark);
+    font-size:clamp(1.3rem,4.5vw,1.7rem);
+    margin:4px 0 2px;
+  }
+  .lesson-rules{
+    list-style:none;
+    padding:0; margin:0 auto 14px;
+    max-width:44ch;
+    text-align:left;
+    color:var(--ink-soft);
+    font-size:.92rem;
+    line-height:1.6;
+  }
+  .lesson-rules li{ padding-left:1.3em; position:relative; margin-bottom:2px; }
+  .lesson-rules li::before{ content:'♟'; position:absolute; left:0; color:var(--gold); }
+
+  .drill-progress{
+    display:flex; justify-content:center; gap:7px;
+    margin:0 0 12px;
+  }
+  .drill-dot{
+    width:9px; height:9px; border-radius:50%;
+    background:rgba(90,60,20,.18);
+    transition:background .25s ease, transform .25s ease;
+  }
+  .drill-dot.done{ background:var(--wax-bright); }
+  .drill-dot.active{ transform:scale(1.3); background:var(--gold); }
+
+  .chess-board-wrap{
+    display:inline-grid;
+    grid-template-columns:18px min(380px,78vw);
+    grid-template-rows:min(380px,78vw) 18px;
+    margin:6px auto 10px;
+  }
+  .chess-board{
+    grid-column:2; grid-row:1;
+    display:grid;
+    grid-template-columns:repeat(8,1fr);
+    grid-template-rows:repeat(8,1fr);
+    width:100%; height:100%;
+    border:3px solid var(--wax-dark);
+    border-radius:3px;
+    overflow:hidden;
+    box-shadow:0 14px 30px rgba(60,40,10,.3);
+  }
+  .rank-labels{ grid-column:1; grid-row:1; display:flex; flex-direction:column; }
+  .file-labels{ grid-column:2; grid-row:2; display:flex; }
+  .rank-labels span, .file-labels span{
+    flex:1; display:flex; align-items:center; justify-content:center;
+    font-family:'Courier New', monospace;
+    font-size:.62rem;
+    color:var(--ink-soft);
+  }
+  .chess-sq{
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    font-size:clamp(1.5rem,6.4vw,2.3rem);
+    cursor:pointer;
+    user-select:none;
+    transition:background .15s ease;
+  }
+  .chess-sq.light{ background:#f1e6c9; }
+  .chess-sq.dark{ background:#9c7a44; }
+  .chess-sq.selected{ box-shadow:inset 0 0 0 3px var(--wax-bright); }
+  .chess-sq .hint-dot{
+    position:absolute; width:22%; height:22%; border-radius:50%;
+    background:rgba(90,36,32,.38);
+    pointer-events:none;
+  }
+  .chess-sq.flash-good{ animation:sqGood .55s ease; }
+  .chess-sq.flash-bad{ animation:sqBad .45s ease; }
+  @keyframes sqGood{
+    0%{ background:#8bb06a; } 100%{ background:inherit; }
+  }
+  @keyframes sqBad{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-4px); background:#c76b6b; }
+    75%{ transform:translateX(4px); background:#c76b6b; }
+  }
+  .piece-glyph{ display:block; line-height:1; filter:drop-shadow(0 2px 1px rgba(0,0,0,.25)); }
+  .piece-w{ color:#fbf6e8; -webkit-text-stroke:1.5px #6b4a22; text-stroke:1.5px #6b4a22; }
+  .piece-b{ color:#2a1d12; -webkit-text-stroke:1px #6b4a22; text-stroke:1px #6b4a22; }
+
+  .drill-feedback{
+    min-height:1.6em;
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:1.05rem;
+    color:var(--wax-dark);
+    margin:2px 0 14px;
+    transition:opacity .2s ease;
+  }
+  .drill-feedback.bad{ color:var(--wax-bright); }
+
+  .lesson-complete-card{
+    display:none;
+    max-width:420px; margin:0 auto;
+    padding:22px 24px;
+    background:rgba(255,255,255,.5);
+    border:1px solid rgba(199,107,115,.3);
+    border-radius:16px;
+  }
+  .lesson-complete-card.show{ display:block; animation:unfold .6s cubic-bezier(.2,.7,.25,1); }
+  .lesson-complete-card .stars-big{ font-size:1.8rem; letter-spacing:4px; color:var(--gold); margin-bottom:6px; }
+  .recap-card{
+    max-width:440px; margin:0 auto; padding:30px 26px;
+    background:rgba(255,255,255,.5);
+    border:1px solid rgba(199,107,115,.3);
+    border-radius:18px;
+  }
+  .recap-card .signature{
+    font-family:'Dancing Script', cursive;
+    font-weight:700;
+    color:var(--wax-dark);
+    font-size:1.9rem;
+    margin-top:10px;
+  }
 </style>
 </head>
 <body>
@@ -878,6 +1090,7 @@
   <button type="button" data-goto="4" aria-label="letter" title="letter">💌</button>
   <button type="button" data-goto="5" aria-label="stars & music" title="stars & music">✨</button>
   <button type="button" data-goto="6" aria-label="dino game" title="dino game">🦕</button>
+  <button type="button" data-goto="7" aria-label="chess school" title="chess school">♟️</button>
 </nav>
 
 <div class="stage">
@@ -1294,6 +1507,52 @@
         </div>
         <div class="dino-overlay" id="dinoOverlay"><p>tap to start</p></div>
       </div>
+    </div>
+  </section>
+
+  <!-- ================= SCREEN 7 : CHESS SCHOOL ================= -->
+  <section id="screen7" class="screen enter-right">
+    <button class="back-btn on-paper" onclick="goTo(6)">&larr; back</button>
+    <div class="chess-content">
+
+      <div class="lesson-map-view" id="lessonMapView">
+        <h2 class="section-heading">chess, from zero ♟️</h2>
+        <p class="chess-sub">a little course just for you — one step at a time, click a stone to begin</p>
+        <div class="course-bar"><div class="course-bar-fill" id="courseBarFill" style="width:0%"></div></div>
+        <div class="lesson-map" id="lessonMap"></div>
+      </div>
+
+      <div class="lesson-play" id="lessonPlayView">
+        <div class="lesson-back-row">
+          <button class="back-btn on-paper" style="position:static;" onclick="chessBackToMap()">&larr; map</button>
+        </div>
+        <h3 class="lesson-title" id="lessonTitle"></h3>
+        <ul class="lesson-rules" id="lessonRules"></ul>
+        <div class="drill-progress" id="drillProgress"></div>
+
+        <div id="boardArea">
+          <div class="chess-board-wrap">
+            <div class="rank-labels" id="rankLabels"></div>
+            <div class="chess-board" id="chessBoard"></div>
+            <div class="file-labels" id="fileLabels"></div>
+          </div>
+          <p class="drill-feedback" id="drillFeedback">&nbsp;</p>
+        </div>
+
+        <div class="lesson-complete-card" id="lessonCompleteCard">
+          <div class="stars-big" id="lessonStarsBig">★★★</div>
+          <p class="bouquet-msg-text" style="margin:0 0 14px;" id="lessonCompleteText">lesson complete!</p>
+          <button class="turn-page" onclick="chessContinueAfterLesson()">continue &rarr;</button>
+        </div>
+
+        <div class="recap-card" id="recapCard" style="display:none;">
+          <p class="bouquet-msg-text" style="margin:0 0 6px;">You now know how every piece moves, what check and checkmate mean, and how to castle.</p>
+          <p class="bouquet-msg-text" style="margin:0;">That's genuinely all the rules — everything from here is just practice. I'd love to play our first real game together now 💛</p>
+          <p class="signature">Merei</p>
+          <button class="turn-page" style="margin-top:16px;" onclick="chessBackToMap()">back to the map</button>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -2036,6 +2295,515 @@ setTimeout(() => {
 
   reset();
   draw();
+})();
+
+/* ---------------- Chess school ---------------- */
+(function(){
+  const FILES = ['a','b','c','d','e','f','g','h'];
+  const isLight = (f,r) => (f+r)%2===1;
+  const inB = (f,r) => f>=0 && f<8 && r>=0 && r<8;
+
+  const GLYPH_W = { K:'♔', Q:'♕', R:'♖', B:'♗', N:'♘', P:'♙' };
+  const GLYPH_B = { K:'♚', Q:'♛', R:'♜', B:'♝', N:'♞', P:'♟' };
+  const glyphFor = (type, color) => (color === 'w' ? GLYPH_W : GLYPH_B)[type];
+
+  const ROOK_DIRS = [[1,0],[-1,0],[0,1],[0,-1]];
+  const BISHOP_DIRS = [[1,1],[1,-1],[-1,1],[-1,-1]];
+  const QUEEN_DIRS = [...ROOK_DIRS, ...BISHOP_DIRS];
+  const KNIGHT_OFFS = [[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]];
+
+  function emptyBoard(){
+    const b = [];
+    for(let f=0; f<8; f++) b.push(new Array(8).fill(null));
+    return b;
+  }
+  function buildBoard(pieces){
+    const b = emptyBoard();
+    pieces.forEach(p => { b[p.f][p.r] = { type:p.type, color:p.color }; });
+    return b;
+  }
+  function slideMoves(board, f0, r0, color, dirs){
+    const out = [];
+    for(const [df,dr] of dirs){
+      let f=f0+df, r=r0+dr;
+      while(inB(f,r)){
+        const p = board[f][r];
+        if(!p){ out.push([f,r]); }
+        else { if(p.color !== color) out.push([f,r]); break; }
+        f+=df; r+=dr;
+      }
+    }
+    return out;
+  }
+  function knightMoves(board, f0, r0, color){
+    const out = [];
+    for(const [df,dr] of KNIGHT_OFFS){
+      const f=f0+df, r=r0+dr;
+      if(!inB(f,r)) continue;
+      const p = board[f][r];
+      if(!p || p.color !== color) out.push([f,r]);
+    }
+    return out;
+  }
+  function kingMoves(board, f0, r0, color){
+    const out = [];
+    for(let df=-1; df<=1; df++) for(let dr=-1; dr<=1; dr++){
+      if(!df && !dr) continue;
+      const f=f0+df, r=r0+dr;
+      if(!inB(f,r)) continue;
+      const p = board[f][r];
+      if(!p || p.color !== color) out.push([f,r]);
+    }
+    return out;
+  }
+  function pawnMoves(board, f0, r0, color){
+    const dir = color === 'w' ? 1 : -1;
+    const startRank = color === 'w' ? 1 : 6;
+    const out = [];
+    const r1 = r0+dir;
+    if(inB(f0,r1) && !board[f0][r1]){
+      out.push([f0,r1]);
+      if(r0 === startRank){
+        const r2 = r0+2*dir;
+        if(!board[f0][r2]) out.push([f0,r2]);
+      }
+    }
+    for(const df of [-1,1]){
+      const f=f0+df, r=r0+dir;
+      if(!inB(f,r)) continue;
+      const p = board[f][r];
+      if(p && p.color !== color) out.push([f,r]);
+    }
+    return out;
+  }
+  function movesFor(board, f, r, type, color){
+    switch(type){
+      case 'P': return pawnMoves(board,f,r,color);
+      case 'N': return knightMoves(board,f,r,color);
+      case 'B': return slideMoves(board,f,r,color,BISHOP_DIRS);
+      case 'R': return slideMoves(board,f,r,color,ROOK_DIRS);
+      case 'Q': return slideMoves(board,f,r,color,QUEEN_DIRS);
+      case 'K': return kingMoves(board,f,r,color);
+    }
+    return [];
+  }
+
+  // ---- lesson curriculum ----
+  const LESSONS = [
+    {
+      id:'board', icon:'🏁', label:'the board', title:'Reading the board',
+      rules:[
+        "Columns (files) are lettered a–h, left to right.",
+        "Rows (ranks) are numbered 1–8, bottom to top.",
+        "Every square has one name, like e4 or a1."
+      ],
+      type:'identify',
+      drills:[
+        { prompt:"Click square e4.", pieces:[], correct:{f:4,r:3}, hint:"e-file, 4th rank — count from the bottom-left" },
+        { prompt:"Click square a1.", pieces:[], correct:{f:0,r:0}, hint:"the bottom-left corner" },
+        { prompt:"Click square h8.", pieces:[], correct:{f:7,r:7}, hint:"the top-right corner" }
+      ],
+      completeMsg:"You can read the board!"
+    },
+    {
+      id:'pawn', icon:'♙', label:'the pawn', title:'The Pawn',
+      rules:[
+        "Moves straight ahead, one square at a time.",
+        "On its very first move, it may step two squares.",
+        "Captures only diagonally — never straight ahead."
+      ],
+      type:'move',
+      drills:[
+        { prompt:"Select the pawn, then move it forward.", pieces:[{f:4,r:1,type:'P',color:'w'}], movable:{f:4,r:1,type:'P',color:'w'}, hint:"pawns step straight ahead" },
+        { prompt:"Advance, or capture the black pawn diagonally — your choice.", pieces:[{f:4,r:3,type:'P',color:'w'},{f:3,r:4,type:'P',color:'b'}], movable:{f:4,r:3,type:'P',color:'w'}, hint:"forward one square, or diagonally onto the black pawn" },
+        { prompt:"The way ahead is blocked — find the only legal move.", pieces:[{f:4,r:3,type:'P',color:'w'},{f:4,r:4,type:'P',color:'b'},{f:5,r:4,type:'P',color:'b'}], movable:{f:4,r:3,type:'P',color:'w'}, hint:"a blocked pawn can't capture straight ahead — only diagonally" }
+      ],
+      completeMsg:"Pawns mastered!"
+    },
+    {
+      id:'knight', icon:'♘', label:'the knight', title:'The Knight',
+      rules:[
+        "Moves in an L-shape: two squares one way, then one square sideways.",
+        "The only piece that can jump clean over others."
+      ],
+      type:'move',
+      drills:[
+        { prompt:"Try any of its eight possible jumps.", pieces:[{f:3,r:3,type:'N',color:'w'}], movable:{f:3,r:3,type:'N',color:'w'}, hint:"two squares, then turn one square sideways" },
+        { prompt:"Fewer options near the edge — find one.", pieces:[{f:0,r:0,type:'N',color:'w'}], movable:{f:0,r:0,type:'N',color:'w'}, hint:"corners are cramped for a knight" }
+      ],
+      completeMsg:"The tricky knight — tamed!"
+    },
+    {
+      id:'bishop', icon:'♗', label:'the bishop', title:'The Bishop',
+      rules:[
+        "Glides diagonally, any distance.",
+        "Stops at the first piece in its way — captures if it's an enemy.",
+        "Stays on the same color square forever."
+      ],
+      type:'move',
+      drills:[
+        { prompt:"Slide along a diagonal.", pieces:[{f:2,r:0,type:'B',color:'w'}], movable:{f:2,r:0,type:'B',color:'w'}, hint:"bishops only move diagonally" },
+        { prompt:"One path is blocked, the other has a capture.", pieces:[{f:2,r:0,type:'B',color:'w'},{f:4,r:2,type:'P',color:'w'},{f:0,r:2,type:'P',color:'b'}], movable:{f:2,r:0,type:'B',color:'w'}, hint:"it can't pass its own pawn, but it can capture the black one" }
+      ],
+      completeMsg:"Diagonals unlocked!"
+    },
+    {
+      id:'rook', icon:'♖', label:'the rook', title:'The Rook',
+      rules:[
+        "Glides in straight lines — up, down, left, right.",
+        "Stops at the first piece in its way — captures if it's an enemy."
+      ],
+      type:'move',
+      drills:[
+        { prompt:"Slide along a rank or file.", pieces:[{f:0,r:0,type:'R',color:'w'}], movable:{f:0,r:0,type:'R',color:'w'}, hint:"straight lines only — no diagonals" },
+        { prompt:"One path is blocked, the other has a capture.", pieces:[{f:0,r:0,type:'R',color:'w'},{f:0,r:3,type:'P',color:'w'},{f:3,r:0,type:'P',color:'b'}], movable:{f:0,r:0,type:'R',color:'w'}, hint:"it can't pass its own pawn, but it can capture the black one" }
+      ],
+      completeMsg:"Rooks are yours!"
+    },
+    {
+      id:'queen', icon:'♕', label:'the queen', title:'The Queen',
+      rules:[
+        "Combines the rook and the bishop — any straight line or diagonal.",
+        "The most powerful piece on the board."
+      ],
+      type:'move',
+      drills:[
+        { prompt:"The queen moves almost anywhere from here — try it.", pieces:[{f:3,r:3,type:'Q',color:'w'}], movable:{f:3,r:3,type:'Q',color:'w'}, hint:"straight or diagonal, any distance" },
+        { prompt:"Even the queen stops at her own pieces — find a capture.", pieces:[{f:3,r:0,type:'Q',color:'w'},{f:3,r:3,type:'P',color:'w'},{f:0,r:3,type:'P',color:'b'}], movable:{f:3,r:0,type:'Q',color:'w'}, hint:"try the diagonal toward the black pawn" }
+      ],
+      completeMsg:"The queen bows to you now!"
+    },
+    {
+      id:'king', icon:'♔', label:'the king', title:'The King',
+      rules:[
+        "Moves one square in any direction.",
+        "Never allowed to step into check — we'll cover that next."
+      ],
+      type:'move',
+      drills:[
+        { prompt:"Step anywhere nearby.", pieces:[{f:4,r:3,type:'K',color:'w'}], movable:{f:4,r:3,type:'K',color:'w'}, hint:"just one square, any direction" },
+        { prompt:"Cramped in the corner — still has options.", pieces:[{f:0,r:0,type:'K',color:'w'}], movable:{f:0,r:0,type:'K',color:'w'}, hint:"one square, any direction" }
+      ],
+      completeMsg:"Protect this piece above all!"
+    },
+    {
+      id:'check', icon:'❕', label:'check', title:'Check',
+      rules:[
+        "Check means the king is under direct attack.",
+        "The king must get out of check immediately — move it, block it, or capture the attacker."
+      ],
+      type:'identify',
+      drills:[
+        { prompt:"Which black piece is giving check?", pieces:[{f:4,r:0,type:'K',color:'w'},{f:4,r:7,type:'R',color:'b'},{f:0,r:5,type:'B',color:'b'}], correct:{f:4,r:7}, hint:"look along the king's own file" },
+        { prompt:"And here — which piece is checking the king?", pieces:[{f:4,r:0,type:'K',color:'w'},{f:7,r:3,type:'Q',color:'b'},{f:1,r:7,type:'N',color:'b'}], correct:{f:7,r:3}, hint:"check the diagonal from the king" }
+      ],
+      completeMsg:"You can spot a check!"
+    },
+    {
+      id:'escape', icon:'🛡️', label:'escaping check', title:'Escaping Check',
+      rules:[
+        "When in check, one way out is simply moving the king to safety.",
+        "A safe square is one the attacker can no longer reach."
+      ],
+      type:'move',
+      drills:[
+        { prompt:"The king is in check — move it to safety.", pieces:[{f:4,r:0,type:'K',color:'w'},{f:4,r:7,type:'R',color:'b'}], movable:{f:4,r:0,type:'K',color:'w'}, mode:'king-escape', checker:{f:4,r:7,type:'R',color:'b'}, hint:"step off the file the rook attacks" },
+        { prompt:"Try again with a different attacker.", pieces:[{f:4,r:0,type:'K',color:'w'},{f:7,r:3,type:'Q',color:'b'}], movable:{f:4,r:0,type:'K',color:'w'}, mode:'king-escape', checker:{f:7,r:3,type:'Q',color:'b'}, hint:"avoid the queen's diagonal" }
+      ],
+      completeMsg:"Nicely dodged!"
+    },
+    {
+      id:'checkmate', icon:'♚', label:'checkmate', title:'Checkmate',
+      rules:[
+        "Checkmate: the king is in check, with no escape, no block, and no capture.",
+        "That's how the game ends. Let's deliver one."
+      ],
+      type:'move',
+      drills:[
+        { prompt:"Deliver checkmate in one move with the queen.", pieces:[{f:2,r:0,type:'K',color:'w'},{f:0,r:0,type:'Q',color:'w'},{f:7,r:7,type:'K',color:'b'},{f:5,r:6,type:'P',color:'b'},{f:6,r:6,type:'P',color:'b'},{f:7,r:6,type:'P',color:'b'}], movable:{f:0,r:0,type:'Q',color:'w'}, exact:{f:0,r:7}, hint:"slide the queen all the way up the open file — the king has nowhere to run, boxed in by its own pawns" },
+        { prompt:"One more — find the mate with the rook.", pieces:[{f:2,r:0,type:'K',color:'w'},{f:0,r:3,type:'R',color:'w'},{f:7,r:7,type:'K',color:'b'},{f:5,r:6,type:'P',color:'b'},{f:6,r:6,type:'P',color:'b'},{f:7,r:6,type:'P',color:'b'}], movable:{f:0,r:3,type:'R',color:'w'}, exact:{f:0,r:7}, hint:"the same idea — reach the back rank" }
+      ],
+      completeMsg:"Checkmate — you did it!"
+    },
+    {
+      id:'castling', icon:'🏰', label:'castling', title:'Castling',
+      rules:[
+        "A special move: the king slides two squares toward a rook, and the rook hops to the other side.",
+        "Only works if neither piece has moved yet, and nothing stands between them."
+      ],
+      type:'move',
+      drills:[
+        { prompt:"Castle kingside — move the king two squares toward the rook.", pieces:[{f:4,r:0,type:'K',color:'w'},{f:7,r:0,type:'R',color:'w'}], movable:{f:4,r:0,type:'K',color:'w'}, exact:{f:6,r:0}, hintSquares:[[6,0]], castleRookFrom:{f:7,r:0}, castleRookTo:{f:5,r:0}, hint:"two squares toward the rook" }
+      ],
+      completeMsg:"Castled to safety!"
+    },
+    {
+      id:'recap', icon:'💛', label:'well done', title:"That's the whole game",
+      rules:[], type:'recap', drills:[]
+    }
+  ];
+
+  const PROGRESS_KEY = 'nargizChessProgress';
+  function loadProgress(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY));
+      if(saved && typeof saved.unlocked === 'number' && saved.stars) return saved;
+    } catch(e){}
+    return { unlocked:0, stars:{} };
+  }
+  function saveProgress(){ localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }
+  let progress = loadProgress();
+
+  let currentLessonIndex = 0, currentDrillIndex = 0, currentPieces = [], selected = null, currentLegal = [], mistakesThisLesson = 0;
+
+  const mapViewEl = document.getElementById('lessonMapView');
+  const playViewEl = document.getElementById('lessonPlayView');
+  const mapEl = document.getElementById('lessonMap');
+  const boardEl = document.getElementById('chessBoard');
+  const rankLabelsEl = document.getElementById('rankLabels');
+  const fileLabelsEl = document.getElementById('fileLabels');
+  const feedbackEl = document.getElementById('drillFeedback');
+  const dotsEl = document.getElementById('drillProgress');
+  const titleEl = document.getElementById('lessonTitle');
+  const rulesEl = document.getElementById('lessonRules');
+  const completeCardEl = document.getElementById('lessonCompleteCard');
+  const recapCardEl = document.getElementById('recapCard');
+  const boardAreaEl = document.getElementById('boardArea');
+
+  function renderLabels(){
+    rankLabelsEl.innerHTML = '';
+    for(let r=7; r>=0; r--){
+      const s = document.createElement('span');
+      s.textContent = String(r+1);
+      rankLabelsEl.appendChild(s);
+    }
+    fileLabelsEl.innerHTML = '';
+    FILES.forEach(f => {
+      const s = document.createElement('span');
+      s.textContent = f;
+      fileLabelsEl.appendChild(s);
+    });
+  }
+  renderLabels();
+
+  function squareEl(f,r){ return boardEl.querySelector(`[data-f="${f}"][data-r="${r}"]`); }
+
+  function renderBoard(pieces){
+    boardEl.innerHTML = '';
+    for(let row=0; row<8; row++){
+      const rank = 7-row;
+      for(let col=0; col<8; col++){
+        const file = col;
+        const sq = document.createElement('div');
+        sq.className = 'chess-sq ' + (isLight(file,rank) ? 'light' : 'dark');
+        sq.dataset.f = file; sq.dataset.r = rank;
+        const p = pieces.find(pp => pp.f === file && pp.r === rank);
+        if(p){
+          const span = document.createElement('span');
+          span.className = 'piece-glyph piece-' + p.color;
+          span.textContent = glyphFor(p.type, p.color);
+          sq.appendChild(span);
+        }
+        sq.addEventListener('click', () => onSquareClick(file, rank));
+        boardEl.appendChild(sq);
+      }
+    }
+  }
+
+  function clearHints(){
+    boardEl.querySelectorAll('.hint-dot').forEach(d => d.remove());
+    boardEl.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+  }
+  function addHintDot(f,r){
+    const sq = squareEl(f,r);
+    if(!sq) return;
+    const dot = document.createElement('span');
+    dot.className = 'hint-dot';
+    sq.appendChild(dot);
+  }
+
+  function setFeedback(text, bad){
+    feedbackEl.textContent = text;
+    feedbackEl.classList.toggle('bad', !!bad);
+  }
+
+  function renderDots(total, activeIdx){
+    dotsEl.innerHTML = '';
+    for(let i=0; i<total; i++){
+      const d = document.createElement('span');
+      d.className = 'drill-dot' + (i < activeIdx ? ' done' : '') + (i === activeIdx ? ' active' : '');
+      dotsEl.appendChild(d);
+    }
+  }
+
+  function currentLesson(){ return LESSONS[currentLessonIndex]; }
+  function currentDrill(){ return currentLesson().drills[currentDrillIndex]; }
+
+  function applyMove(pieces, from, to){
+    const capIdx = pieces.findIndex(p => p.f === to.f && p.r === to.r);
+    if(capIdx >= 0) pieces.splice(capIdx, 1);
+    const moving = pieces.find(p => p.f === from.f && p.r === from.r);
+    if(moving){ moving.f = to.f; moving.r = to.r; }
+  }
+
+  function onSquareClick(f, r){
+    const drill = currentDrill();
+    if(!drill) return;
+    const sqEl = squareEl(f,r);
+
+    if(currentLesson().type === 'identify'){
+      if(f === drill.correct.f && r === drill.correct.r) onSuccess(sqEl, null);
+      else onFail(sqEl, drill.hint || "not quite — try another");
+      return;
+    }
+
+    if(!selected){
+      if(f === drill.movable.f && r === drill.movable.r){
+        selected = { f, r };
+        sqEl.classList.add('selected');
+        currentLegal = drill.hintSquares || movesFor(buildBoard(currentPieces), f, r, drill.movable.type, drill.movable.color);
+        currentLegal.forEach(([ff,rr]) => addHintDot(ff,rr));
+      } else {
+        onFail(sqEl, "tap the glowing piece first");
+      }
+      return;
+    }
+
+    const target = { f, r };
+    let ok;
+    if(drill.exact){
+      ok = target.f === drill.exact.f && target.r === drill.exact.r;
+    } else if(drill.mode === 'king-escape'){
+      const board = buildBoard(currentPieces);
+      const kMoves = movesFor(board, selected.f, selected.r, 'K', drill.movable.color);
+      const atk = new Set(movesFor(board, drill.checker.f, drill.checker.r, drill.checker.type, drill.checker.color).map(([ff,rr]) => ff+','+rr));
+      ok = kMoves.some(([ff,rr]) => ff===target.f && rr===target.r) && !atk.has(target.f+','+target.r);
+    } else {
+      ok = currentLegal.some(([ff,rr]) => ff===target.f && rr===target.r);
+    }
+
+    if(ok) onSuccess(sqEl, target);
+    else onFail(sqEl, drill.hint || "that's not a legal move — try again");
+  }
+
+  function onSuccess(sqEl, target){
+    sqEl.classList.add('flash-good');
+    clearHints();
+    if(target){
+      const drill = currentDrill();
+      applyMove(currentPieces, selected, target);
+      if(drill.castleRookFrom) applyMove(currentPieces, drill.castleRookFrom, drill.castleRookTo);
+    }
+    selected = null;
+    setFeedback('✓ nicely done', false);
+    setTimeout(() => { renderBoard(currentPieces); nextDrillOrFinish(); }, 650);
+  }
+
+  function onFail(sqEl, hint){
+    if(sqEl){
+      sqEl.classList.remove('flash-bad'); void sqEl.offsetWidth;
+      sqEl.classList.add('flash-bad');
+      setTimeout(() => sqEl && sqEl.classList.remove('flash-bad'), 500);
+    }
+    setFeedback(hint, true);
+    mistakesThisLesson++;
+  }
+
+  function loadDrill(idx){
+    currentDrillIndex = idx;
+    const drill = currentLesson().drills[idx];
+    currentPieces = drill.pieces.map(p => ({...p}));
+    selected = null;
+    renderBoard(currentPieces);
+    setFeedback(drill.prompt, false);
+    renderDots(currentLesson().drills.length, idx);
+  }
+
+  function nextDrillOrFinish(){
+    const lesson = currentLesson();
+    if(currentDrillIndex + 1 < lesson.drills.length) loadDrill(currentDrillIndex + 1);
+    else finishLesson();
+  }
+
+  function finishLesson(){
+    const lesson = currentLesson();
+    const stars = mistakesThisLesson === 0 ? 3 : (mistakesThisLesson <= 2 ? 2 : 1);
+    progress.stars[lesson.id] = Math.max(progress.stars[lesson.id] || 0, stars);
+    progress.unlocked = Math.max(progress.unlocked, Math.min(currentLessonIndex + 1, LESSONS.length - 1));
+    saveProgress();
+    document.getElementById('lessonStarsBig').textContent = '★'.repeat(stars) + '☆'.repeat(3-stars);
+    document.getElementById('lessonCompleteText').textContent = lesson.completeMsg || 'lesson complete!';
+    completeCardEl.classList.add('show');
+  }
+
+  function openLesson(i){
+    currentLessonIndex = i;
+    mistakesThisLesson = 0;
+    const lesson = LESSONS[i];
+    mapViewEl.classList.add('hidden');
+    playViewEl.classList.add('active');
+    titleEl.textContent = lesson.title;
+    rulesEl.innerHTML = '';
+    lesson.rules.forEach(r => { const li = document.createElement('li'); li.textContent = r; rulesEl.appendChild(li); });
+    completeCardEl.classList.remove('show');
+
+    if(lesson.type === 'recap'){
+      boardAreaEl.style.display = 'none';
+      dotsEl.style.display = 'none';
+      recapCardEl.style.display = 'block';
+      progress.unlocked = Math.max(progress.unlocked, LESSONS.length - 1);
+      progress.stars[lesson.id] = 3;
+      saveProgress();
+      return;
+    }
+    boardAreaEl.style.display = '';
+    dotsEl.style.display = '';
+    recapCardEl.style.display = 'none';
+    loadDrill(0);
+  }
+
+  function renderMap(){
+    mapEl.innerHTML = '';
+    LESSONS.forEach((lesson, i) => {
+      const row = document.createElement('div');
+      const offsetClass = ['', 'off-r', '', 'off-l'][i % 4];
+      row.className = 'lesson-row ' + offsetClass;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      const locked = i > progress.unlocked;
+      const stars = progress.stars[lesson.id];
+      btn.className = 'lesson-node' + (locked ? ' locked' : '') + (!locked && stars === undefined ? ' current' : '');
+      btn.innerHTML = locked ? '<span class="lock-icon">🔒</span>' : lesson.icon;
+      if(stars !== undefined){
+        const starsEl = document.createElement('span');
+        starsEl.className = 'stars';
+        starsEl.textContent = '★'.repeat(stars) + '☆'.repeat(3-stars);
+        btn.appendChild(starsEl);
+      }
+      btn.disabled = locked;
+      btn.addEventListener('click', () => { if(!locked) openLesson(i); });
+      row.appendChild(btn);
+
+      const label = document.createElement('div');
+      label.className = 'lesson-label';
+      label.textContent = lesson.label;
+      row.appendChild(label);
+
+      mapEl.appendChild(row);
+    });
+    const pct = Math.round((Object.keys(progress.stars).length / LESSONS.length) * 100);
+    document.getElementById('courseBarFill').style.width = pct + '%';
+  }
+
+  window.chessBackToMap = function(){
+    playViewEl.classList.remove('active');
+    mapViewEl.classList.remove('hidden');
+    renderMap();
+  };
+  window.chessContinueAfterLesson = function(){ chessBackToMap(); };
+
+  renderMap();
 })();
 </script>
 </body>
